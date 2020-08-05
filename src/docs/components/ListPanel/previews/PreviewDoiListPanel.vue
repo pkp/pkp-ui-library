@@ -5,7 +5,6 @@
 		:items="items"
 		:itemsMax="itemsMax"
 		title="DOI Management"
-		urlBase="https://example.com/announcement/view/__id__"
 	/>
 </template>
 <script>
@@ -46,16 +45,27 @@ export default {
 					fr_CA: 'Title number two',
 					ar_AR: 'Title number two'
 				}
+			},
+			{
+				dateExpire: '2021-12-08',
+				datePosted: '2019-12-12',
+				id: 3,
+				author: {
+					en_US: 'C. Author et al.',
+					fr_CA: 'C. Author et al.',
+					ar_AR: 'C. Author et al.'
+				},
+				title: {
+					en_US: 'Title number three',
+					fr_CA: 'Title number three',
+					ar_AR: 'Title number three'
+				}
 			}
 		];
 
 		return {
 			items: [...items],
-			itemsMax: items.length,
-			canSelectAll: true,
-			isSelectAllOn: false,
-			selected: [],
-			expanded: []
+			itemsMax: items.length
 		};
 	}
 };

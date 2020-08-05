@@ -26,23 +26,15 @@
 					</div>
 				</template>
 
-				<template v-slot:itemTitle="{item}">
-					<!--Temp selector placement-->
-					<label class="listPanel__selectWrapper">
-						<div class="listPanel__selector">
-							<input
-								type="checkbox"
-								name="submissions[]"
-								:value="item.id"
-								v-model="selected"
-							/>
-						</div>
-					</label>
-					<div>{{ localize(item.author) }}</div>
-				</template>
-
-				<template v-slot:itemSubtitle="{item}">
-					{{ localize(item.title) }}
+				<template v-slot:item="{item}">
+					<slot name="item" :item="item">
+						<doi-list-item
+							:key="item.id"
+							:item="item"
+							@toggleDoiSelected="toggleDoiSelected"
+							:selected="selected"
+						/>
+					</slot>
 				</template>
 
 				<pagination
@@ -64,9 +56,11 @@ import Pagination from '@/components/Pagination/Pagination.vue';
 import PkpHeader from '@/components/Header/Header.vue';
 import Search from '@/components/Search/Search.vue';
 import fetch from '@/mixins/fetch';
+import DoiListItem from '@/components/ListPanel/doi/DoiListItem';
 
 export default {
 	components: {
+		DoiListItem,
 		ListPanel,
 		Pagination,
 		PkpHeader,
@@ -90,32 +84,17 @@ export default {
 				return 0;
 			}
 		},
-		canSelectAll: {
-			type: Boolean,
-			default() {
-				return true;
-			}
-		},
-		isSelectAllOn: {
-			type: Boolean,
-			default() {
-				return false;
-			}
-		},
-		selected: {
-			type: Array,
-			default() {
-				return [];
-			}
-		},
 		title: {
 			type: String,
 			required: true
-		},
-		urlBase: {
-			type: String,
-			required: true
 		}
+	},
+	data() {
+		return {
+			canSelectAll: true,
+			isSelectAllOn: false,
+			selected: []
+		};
 	},
 	methods: {
 		/**
@@ -132,17 +111,44 @@ export default {
 			});
 		},
 		/**
-		 * Toggle select all for list of items
+		 * Toggle DoiListItem status in DoiListPanel
+		 *
+		 * @param {Number} itemId
+		 * @param {Boolean} isSelected Item selection status
+		 */
+		toggleDoiSelected(itemId, isSelected) {
+			if (isSelected) {
+				if (!this.selected.includes(itemId)) {
+					// Add to selected
+					this.selected.push(itemId);
+				}
+			} else {
+				if (this.selected.includes(itemId)) {
+					// Remove if exists
+					this.selected = this.selected.filter(item => item !== itemId);
+				}
+			}
+		},
+		/**
+		 * Toggle select all for Ids in selected
 		 */
 		toggleSelectAll() {
 			if (this.isSelectAllOn) {
 				this.selected = [];
+				this.isSelectAllOn = false;
 			} else {
 				this.selected = this.items.map(i => i.id);
+				this.isSelectAllOn = true;
 			}
 		}
 	},
 	watch: {
+		/**
+		 * Sets isSelectAllOn value based on items in `selected` array
+		 *
+		 * @param newVal
+		 * @param oldVal
+		 */
 		selected(newVal, oldVal) {
 			this.isSelectAllOn =
 				this.selected.length && this.selected.length === this.items.length;
