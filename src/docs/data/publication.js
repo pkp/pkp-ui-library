@@ -97,6 +97,7 @@ export default {
 			isApproved: false,
 			label: 'PDF',
 			locale: 'en_US',
+			'pub-id::doi': '10.9876/def456',
 			publicationId: 17,
 			seq: 0,
 			urlPublished: 'http://...',
@@ -143,6 +144,7 @@ export default {
 		en_US: 'The'
 	},
 	primaryContactId: 20,
+	'pub-id::doi': '10.9876/abc123',
 	'pub-id::publisher-id': 'lorem-ipsum',
 	publicationDateType: 'pub',
 	publicationSummary: {

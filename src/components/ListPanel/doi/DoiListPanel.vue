@@ -13,7 +13,7 @@
 							/>
 						</template>
 					</pkp-header>
-					<div v-if="canSelectAll" class="listPanel__selectAllWrapper">
+					<div v-if="isSelectable" class="listPanel__selectAllWrapper">
 						<input
 							type="checkbox"
 							:id="id + '-selectAll'"
@@ -33,6 +33,7 @@
 							:item="item"
 							@toggleDoiSelected="toggleDoiSelected"
 							:selected="selected"
+							:isSelectable="isSelectable"
 						/>
 					</slot>
 				</template>
@@ -87,11 +88,16 @@ export default {
 		title: {
 			type: String,
 			required: true
+		},
+		isSelectable: {
+			type: Boolean,
+			default() {
+				return true;
+			}
 		}
 	},
 	data() {
 		return {
-			canSelectAll: true,
 			isSelectAllOn: false,
 			selected: []
 		};

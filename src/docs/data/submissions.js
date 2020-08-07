@@ -16,7 +16,8 @@ export default [
 				fullTitle: {
 					en_US:
 						'Quisque vel ultrices ut vel sollicitudin vel varius suscipit phasellus'
-				}
+				},
+				isPublished: true
 			}
 		],
 		stages: submission.stages.map(stage => {
@@ -25,6 +26,7 @@ export default [
 				currentUserAssignedRoles: [pkp.const.ROLE_ID_MANAGER]
 			};
 		}),
+		status: 3,
 		urlAuthorWorkflow: submission.urlAuthorWorkflow.replace('1', '2'),
 		urlEditorialWorkflow: submission.urlEditorialWorkflow.replace('1', '2'),
 		urlPublished: submission.urlPublished.replace('1', '2'),
