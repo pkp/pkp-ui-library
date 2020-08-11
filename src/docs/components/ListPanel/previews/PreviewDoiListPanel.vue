@@ -1,10 +1,10 @@
 <template>
 	<doi-list-panel
 		apiUrl=""
-		id="previewDoiListPanel"
-		:items="items"
-		:itemsMax="itemsMax"
-		title="DOI Management"
+		id="previewDoiListPanel--articles"
+		:items="articleItems"
+		:itemsMax="articleItemMax"
+		title="Article DOI Management"
 		:isSelectable="true"
 	/>
 </template>
@@ -17,41 +17,79 @@ export default {
 		DoiListPanel
 	},
 	data() {
-		// const items = [
-		// {
-		// 	dateExpire: '2022-02-03',
-		// 	datePosted: '2020-01-29',
-		// 	id: 1,
-		// 	author: {
-		// 		en_US: 'A. Author et al.',
-		// 		fr_CA: 'A. Author et al.',
-		// 		ar_AR: 'A. Author et al.'
-		// 	},
-		// 	title: {
-		// 		en_US: 'Title number one',
-		// 		fr_CA: 'Title number one',
-		// 		ar_AR: 'Title number one'
-		// 	},
-		// 	dois: [
-		// 		{
-		// 			id: 1,
-		// 			type: 'Article',
-		// 			doi: '10.2345/abc123'
-		// 		},
-		// 		{
-		// 			id: 2,
-		// 			type: 'Galley',
-		// 			doi: '10.2345/def456'
-		// 		}
-		// 	]
-		// },
+		const submissionItems = [
+			{
+				id: 1,
+				objectType: 'submission',
+				object: submissions[0]
+			},
+			{
+				id: 2,
+				objectType: 'submission',
+				object: submissions[1]
+			},
+			{
+				id: 3,
+				objectType: 'submission',
+				object: submissions[2]
+			},
+			{
+				id: 4,
+				objectType: 'submission',
+				object: submissions[3]
+			},
+			{
+				id: 5,
+				objectType: 'submission',
+				object: submissions[4]
+			},
+			{
+				id: 6,
+				objectType: 'submission',
+				object: submissions[5]
+			},
+			{
+				id: 7,
+				objectType: 'submission',
+				object: submissions[6]
+			},
+			{
+				id: 8,
+				objectType: 'submission',
+				object: submissions[7]
+			},
+			{
+				id: 9,
+				objectType: 'submission',
+				object: submissions[8]
+			},
+			{
+				id: 10,
+				objectType: 'submission',
+				object: submissions[9]
+			}
+		];
+		// const issueItems = [
 		// 	{
+		// 		id: 1,
+		// 		objectType: 'issue',
+		// 		object: {
+		// 			issueId: 1,
+		// 			volume: 1,
+		// 			number: 2,
+		// 			year: 2020,
+		// 			title: 'Test Issue',
+		// 			'pub-id::doi': '10.9876/123abc',
+		// 			published: 1
+		// 		}
 		// 	}
 		// ];
 
 		return {
-			items: [...submissions],
-			itemsMax: submissions.length
+			articleItems: submissionItems,
+			articleItemMax: submissionItems.length
+			// issueItems: issueItems,
+			// issueItemsMax: issueItems.length
 		};
 	}
 };

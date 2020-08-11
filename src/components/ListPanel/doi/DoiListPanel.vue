@@ -13,16 +13,26 @@
 							/>
 						</template>
 					</pkp-header>
-					<div v-if="isSelectable" class="listPanel__selectAllWrapper">
-						<input
-							type="checkbox"
-							:id="id + '-selectAll'"
-							:checked="isSelectAllOn"
-							@click="toggleSelectAll"
-						/>
-						<label class="listPanel__selectAllLabel" :for="id + '-selectAll'">
-							Select All
-						</label>
+
+					<div class="doiListPanel__options">
+						<div v-if="isSelectable" class="listPanel__selectAllWrapper">
+							<input
+								type="checkbox"
+								:id="id + '-selectAll'"
+								:checked="isSelectAllOn"
+								@click="toggleSelectAll"
+							/>
+							<label class="listPanel__selectAllLabel" :for="id + '-selectAll'">
+								Select All
+							</label>
+						</div>
+
+						<span class="doiListPanel__options--expandAll">
+							<pkp-button @click="toggleExpandAll">
+								<!-- TODO: Localize text -->
+								{{ isExpandAllOn ? 'Collapse all' : 'Expand all' }}
+							</pkp-button>
+						</span>
 					</div>
 				</template>
 
@@ -34,6 +44,7 @@
 							@toggleDoiSelected="toggleDoiSelected"
 							:selected="selected"
 							:isSelectable="isSelectable"
+							:isExpandAllOn="isExpandAllOn"
 						/>
 					</slot>
 				</template>
@@ -98,6 +109,7 @@ export default {
 	},
 	data() {
 		return {
+			isExpandAllOn: false,
 			isSelectAllOn: false,
 			selected: []
 		};
@@ -136,6 +148,12 @@ export default {
 			}
 		},
 		/**
+		 * Toggles expand all for DOI tabs
+		 */
+		toggleExpandAll() {
+			this.isExpandAllOn = !this.isExpandAllOn;
+		},
+		/**
 		 * Toggle select all for Ids in selected
 		 */
 		toggleSelectAll() {
@@ -167,12 +185,21 @@ export default {
 @import '../../../styles/_import';
 
 .doiListPanel {
+	.doiListPanel__options {
+		display: flex;
+	}
+
+	.doiListPanel__options--expandAll {
+		margin-top: 0.5rem;
+	}
+
 	// From PreviewListPanelSelect.vue
 	.listPanel__selectAllWrapper {
 		display: flex;
 		align-items: center;
 		margin-top: 1rem;
 		margin-left: -0.5rem;
+		margin-right: auto;
 		line-height: 1.5rem;
 
 		> input {
