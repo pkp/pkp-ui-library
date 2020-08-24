@@ -16,6 +16,7 @@ import ComponentFieldArchivingPn from './docs/components/Form/fields/FieldArchiv
 import ComponentFieldBaseAutosuggest from './docs/components/Form/fields/FieldBaseAutosuggest/ComponentFieldBaseAutosuggest.vue';
 import ComponentFieldBase from './docs/components/Form/fields/FieldBase/ComponentFieldBase.vue';
 import ComponentFieldColor from './docs/components/Form/fields/FieldColor/ComponentFieldColor.vue';
+import ComponentFieldDoiText from '@/docs/components/Form/fields/FieldDoiText/ComponentFieldDoiText';
 import ComponentFieldPubId from './docs/components/Form/fields/FieldPubId/ComponentFieldPubId.vue';
 import ComponentFieldHtml from './docs/components/Form/fields/FieldHtml/ComponentFieldHtml.vue';
 import ComponentFieldMetadataSetting from './docs/components/Form/fields/FieldMetadataSetting/ComponentFieldMetadataSetting.vue';
@@ -126,6 +127,11 @@ export default new Router({
 			path: '/component/Form/fields/FieldColor/:example?',
 			name: 'Form/fields/FieldColor',
 			component: ComponentFieldColor
+		},
+		{
+			path: '/component/Form/fields/FieldDoiText/:example?',
+			name: 'Form/fields/FieldDoiText',
+			component: ComponentFieldDoiText
 		},
 		{
 			path: '/component/Form/fields/FieldPubId/:example?',

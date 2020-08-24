@@ -77,15 +77,12 @@
 					<template slot="value">{{ item.type }}</template>
 					<div class="doiListItem__doiSummary">
 						<div class="doiListItem__doiDetail">
-							<field-text
+							<field-doi-text
 								v-bind="getDoiField(item.id)"
 								:opt-into-edit="true"
-								opt-into-edit-label="Edit"
+								:opt-into-edit-label="__('common.edit')"
 								@change="changeDoiInput"
 							/>
-							<pkp-button class="doiListItem__doiDetail--editButton">
-								{{ __('common.save') }}
-							</pkp-button>
 						</div>
 
 						<div class="doiListItem__doiActions">
@@ -103,7 +100,7 @@
 
 <script>
 import Expander from '@/components/Expander/Expander.vue';
-import FieldText from '@/components/Form/fields/FieldText';
+import FieldDoiText from '@/components/Form/fields/FieldDoiText';
 import List from '@/components/List/List.vue';
 import ListItem from '@/components/List/ListItem.vue';
 
@@ -111,7 +108,7 @@ export default {
 	name: 'DoiListItem',
 	components: {
 		Expander,
-		FieldText,
+		FieldDoiText,
 		List,
 		ListItem
 	},
@@ -297,7 +294,8 @@ export default {
 				name: doiItem.id,
 				value: doiItem.identifier,
 				allErrors: {},
-				isDisabled: true
+				isDisabled: true,
+				depositStatus: doiItem.depositStatus
 			});
 		}
 	},
