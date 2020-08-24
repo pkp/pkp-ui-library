@@ -16,28 +16,13 @@
 			<!-- Item overview -->
 			<div v-if="isSubmission" class="listPanel__itemIdentity">
 				<!-- Submission -->
-				<div class="listPanel__itemTitle">
-					{{ currentPublication.authorsStringShort }}
-				</div>
-				<div class="listPanel__itemSubtitle">
+				<div class="listPanel__itemTitle doiListItem__itemTitle">
+					{{ item.object.id }} /
+					<b>{{ currentPublication.authorsStringShort }}</b>
+					/
 					<a :href="this.currentPublication.urlPublished" target="_blank">
 						{{ localize(currentPublication.fullTitle) }}
 					</a>
-				</div>
-				<!-- DOI item metadata -->
-				<div class="doiListItem__itemMetadata">
-					<!--			TODO: Localize doi list metadata-->
-					ID: {{ item.object.id }}
-					<badge
-						class="doiListItem__publicationBadge"
-						:is-success="isPublished"
-					>
-						{{ publicationStatusLabel }}
-					</badge>
-					<!-- TODO: Implement properly -->
-					<badge>
-						Not deposited
-					</badge>
 				</div>
 			</div>
 
@@ -49,24 +34,31 @@
 				<div class="listPanel__itemSubtitle">
 					{{ issueInfo }}
 				</div>
-				<!-- DOI item metadata -->
-				<div class="doiListItem__itemMetadata">
-					<!--			TODO: Localize doi list metadata-->
-					ID: {{ item.object.issueId }}
-					<badge
-						class="doiListItem__publicationBadge"
-						:is-success="isPublished"
-					>
-						{{ publicationStatusLabel }}
-					</badge>
-					<!-- TODO: Implement properly -->
-					<badge>
-						Not deposited
-					</badge>
-				</div>
 			</div>
 
 			<div class="listPanel__itemActions">
+				<!-- DOI item metadata -->
+				<div class="doiListItem__itemMetadata">
+					<!--			TODO: Localize doi list metadata-->
+					<badge v-if="!isPublished" class="doiListItem__itemMetadata--badge">
+						{{ publicationStatusLabel }}
+					</badge>
+					<badge
+						v-if="!isEveryDoiDeposited"
+						class="doiListItem__itemMetadata--badge"
+					>
+						Not deposited
+					</badge>
+					<badge
+						v-if="isPublished && !isEveryDoiDeposited"
+						class="doiListItem__itemMetadata--badge"
+						:is-warnable="true"
+					>
+						<icon icon="exclamation" :inline="true" />
+						Needs depositing
+					</badge>
+				</div>
+
 				<expander
 					:isExpanded="isExpanded"
 					:itemName="item.id.toString()"
@@ -83,16 +75,16 @@
 			<list>
 				<list-item v-for="item in doiList" :key="item.id">
 					<template slot="value">{{ item.type }}</template>
-
 					<div class="doiListItem__doiSummary">
 						<div class="doiListItem__doiDetail">
-							<a :href="doiURL(item.identifier)" target="_blank">
-								{{ item.identifier }}
-							</a>
-
-							<!-- TODO: Add localization text -->
-							<pkp-button>
-								Edit
+							<field-text
+								v-bind="getDoiField(item.id)"
+								:opt-into-edit="true"
+								opt-into-edit-label="Edit"
+								@change="changeDoiInput"
+							/>
+							<pkp-button class="doiListItem__doiDetail--editButton">
+								{{ __('common.save') }}
 							</pkp-button>
 						</div>
 
@@ -111,12 +103,15 @@
 
 <script>
 import Expander from '@/components/Expander/Expander.vue';
+import FieldText from '@/components/Form/fields/FieldText';
 import List from '@/components/List/List.vue';
 import ListItem from '@/components/List/ListItem.vue';
+
 export default {
 	name: 'DoiListItem',
 	components: {
 		Expander,
+		FieldText,
 		List,
 		ListItem
 	},
@@ -146,6 +141,7 @@ export default {
 	},
 	data() {
 		return {
+			doiFields: [],
 			isExpanded: false,
 			isSelected: false
 		};
@@ -176,7 +172,7 @@ export default {
 				// Get publication (article) DOIs
 				if (this.currentPublication.hasOwnProperty('pub-id::doi')) {
 					dois.push({
-						id: this.currentPublication.id,
+						id: 'article-' + this.currentPublication.id,
 						type: 'Article',
 						identifier: this.currentPublication['pub-id::doi'],
 						depositStatus: 'Not deposited'
@@ -188,7 +184,7 @@ export default {
 					let galley = this.currentPublication.galleys[i];
 					if (galley.hasOwnProperty('pub-id::doi')) {
 						dois.push({
-							id: galley.id,
+							id: 'galley-' + galley.id,
 							type: 'Galley',
 							identifier: galley['pub-id::doi'],
 							depositStatus: 'Not deposited'
@@ -200,7 +196,7 @@ export default {
 				window.console.log(this.item.object);
 				if (this.item.object.hasOwnProperty('pub-id::doi')) {
 					dois.push({
-						id: this.item.object.issueId,
+						id: 'issue-' + this.item.object.issueId,
 						type: 'Issue',
 						identifier: this.item.object['pub-id::doi'],
 						depositStatus: 'Not deposited'
@@ -210,12 +206,16 @@ export default {
 
 			return dois;
 		},
-		isSubmission() {
-			if (this.item.objectType === 'submission') {
-				return true;
-			} else {
-				return false;
+		isEveryDoiDeposited() {
+			for (const doi of this.doiList) {
+				if (doi.depositStatus === 'Not deposited') {
+					return false;
+				}
 			}
+			return true;
+		},
+		isSubmission() {
+			return this.item.objectType === 'submission';
 		},
 		issueInfo() {
 			return (
@@ -251,6 +251,17 @@ export default {
 	},
 	methods: {
 		/**
+		 * Update field-text field for doi input
+		 *
+		 * @param {String} name FieldText name (doi id)
+		 * @param {String} prop FieldText field "value"
+		 * @param {String} newValue
+		 *
+		 */
+		changeDoiInput(name, prop, newValue) {
+			this.getDoiField(name).value = newValue;
+		},
+		/**
 		 * Builds DOI URLs
 		 *
 		 * @param {String} doi
@@ -261,11 +272,33 @@ export default {
 			return 'https://doi.org/' + doi;
 		},
 		/**
+		 * Gets field in doiFields array for fieldText input handling
+		 *
+		 * @param {String} id
+		 *
+		 * @returns {Object} doiField
+		 */
+		getDoiField(id) {
+			return this.doiFields.find(fieldObj => fieldObj.name === id);
+		},
+		/**
 		 * Toggles item as selected and notifies DoiListPanel
 		 */
 		toggleSelected() {
 			// Notifies DoiListPanel of selection toggle
 			this.$emit('toggleDoiSelected', this.item.id, this.isSelected);
+		}
+	},
+	mounted: function() {
+		// Gets doi objects from doiList on mount and adds them to doiFields
+		// for further manipulation
+		for (let doiItem of this.doiList) {
+			this.doiFields.push({
+				name: doiItem.id,
+				value: doiItem.identifier,
+				allErrors: {},
+				isDisabled: true
+			});
 		}
 	},
 	watch: {
@@ -293,13 +326,15 @@ export default {
 }
 
 .doiListItem__doiDetail {
+	display: flex;
 	flex: 1;
 	min-width: 0;
 }
 
-.doiListItem__doiDetail .pkpButton {
-	margin-left: 1rem;
-	margin-right: 1rem;
+.doiListItem__doiDetail--editButton {
+	margin-top: 0.25rem;
+	margin-left: 0.25rem;
+	margin-right: 0.25rem;
 }
 
 .doiListItem__doiActions {
@@ -318,6 +353,10 @@ export default {
 	}
 }
 
+.doiListItem__itemTitle {
+	font-weight: 400;
+}
+
 .doiListItem__itemMetadata {
 	margin-top: 0.5em;
 	font-size: @font-tiny;
@@ -325,12 +364,11 @@ export default {
 	color: @text;
 }
 
-.listPanel__itemExpanded--doi {
-	margin-left: 2.25rem;
+.doiListItem__itemMetadata--badge {
+	margin-right: 0.25rem;
 }
 
-.doiListItem__publicationBadge {
-	margin-left: 0.5rem;
-	margin-right: 0.25rem;
+.listPanel__itemExpanded--doi {
+	margin-left: 2.25rem;
 }
 </style>

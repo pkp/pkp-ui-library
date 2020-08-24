@@ -11,6 +11,11 @@
 								:searchPhrase="searchPhrase"
 								@search-phrase-changed="setSearchPhrase"
 							/>
+
+							<pkp-button @click="toggleExpandAll">
+								<!-- TODO: Localize text -->
+								{{ isExpandAllOn ? 'Collapse all' : 'Expand all' }}
+							</pkp-button>
 						</template>
 					</pkp-header>
 
@@ -26,13 +31,6 @@
 								Select All
 							</label>
 						</div>
-
-						<span class="doiListPanel__options--expandAll">
-							<pkp-button @click="toggleExpandAll">
-								<!-- TODO: Localize text -->
-								{{ isExpandAllOn ? 'Collapse all' : 'Expand all' }}
-							</pkp-button>
-						</span>
 					</div>
 				</template>
 
@@ -187,10 +185,6 @@ export default {
 .doiListPanel {
 	.doiListPanel__options {
 		display: flex;
-	}
-
-	.doiListPanel__options--expandAll {
-		margin-top: 0.5rem;
 	}
 
 	// From PreviewListPanelSelect.vue
