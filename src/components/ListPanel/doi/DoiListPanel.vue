@@ -1,7 +1,7 @@
 <template>
 	<div class="doiListPanel">
 		<slot>
-			<list-panel :items="items">
+			<list-panel :items="items" :isSidebarVisible="isSidebarVisible">
 				<template slot="header">
 					<pkp-header>
 						<h2>{{ title }}</h2>
@@ -12,24 +12,89 @@
 								@search-phrase-changed="setSearchPhrase"
 							/>
 
-							<pkp-button @click="toggleExpandAll">
+							<pkp-button
+								:is-active="isSidebarVisible"
+								@click="isSidebarVisible = !isSidebarVisible"
+							>
+								<icon icon="filter" :inline="true" />
 								<!-- TODO: Localize text -->
-								{{ isExpandAllOn ? 'Collapse all' : 'Expand all' }}
+								Filters
 							</pkp-button>
+
+							<!--							<pkp-button @click="toggleExpandAll">-->
+							<!--								&lt;!&ndash; TODO: Localize text &ndash;&gt;-->
+							<!--								{{ isExpandAllOn ? 'Collapse all' : 'Expand all' }}-->
+							<!--							</pkp-button>-->
 						</template>
 					</pkp-header>
 
 					<div class="doiListPanel__options">
 						<div v-if="isSelectable" class="listPanel__selectAllWrapper">
-							<input
-								type="checkbox"
-								:id="id + '-selectAll'"
-								:checked="isSelectAllOn"
-								@click="toggleSelectAll"
-							/>
-							<label class="listPanel__selectAllLabel" :for="id + '-selectAll'">
+							<!--							<input-->
+							<!--								type="checkbox"-->
+							<!--								:id="id + '-selectAll'"-->
+							<!--								:checked="isSelectAllOn"-->
+							<!--								@click="toggleSelectAll"-->
+							<!--							/>-->
+							<!--							<label class="listPanel__selectAllLabel" :for="id + '-selectAll'">-->
+							<!--								Select All-->
+							<!--							</label>-->
+							<pkp-button @click="toggleSelectAll">
+								<icon
+									:icon="isSelectAllOn ? 'check-square-o' : 'square-o'"
+									:inline="true"
+								/>
 								Select All
-							</label>
+							</pkp-button>
+							<div class="doiListPanel__options--button">
+								<dropdown label="Actions">
+									<ul>
+										<li>
+											<button class="pkpDropdown__action">
+												Deposit selected
+											</button>
+										</li>
+										<li>
+											<button class="pkpDropdown__action">Button Two</button>
+										</li>
+									</ul>
+								</dropdown>
+							</div>
+						</div>
+						<span class="doiListPanel__options--button">
+							<pkp-button @click="toggleExpandAll">
+								<!-- TODO: Localize text -->
+								{{ isExpandAllOn ? 'Collapse all' : 'Expand all' }}
+							</pkp-button>
+						</span>
+					</div>
+				</template>
+
+				<template slot="sidebar">
+					<pkp-header :isOneLine="false">
+						<h3>
+							<icon icon="filter" :inline="true" />
+							Filters
+						</h3>
+					</pkp-header>
+					<div>
+						<div
+							v-for="(filterSet, index) in filters"
+							:key="index"
+							class="listPanel__filterSet"
+						>
+							<pkp-header v-if="filterSet.heading">
+								<h4>{{ filterSet.heading }}</h4>
+							</pkp-header>
+							<component
+								v-for="filter in filterSet.filters"
+								:key="filter.param + filter.value"
+								:is="filter.filterType || 'pkp-filter'"
+								v-bind="filter"
+								:isFilterActive="isFilterActive(filter.param, filter.value)"
+								@add-filter="addFilter"
+								@remove-filter="removeFilter"
+							/>
 						</div>
 					</div>
 				</template>
@@ -64,15 +129,19 @@
 import ListPanel from '@/components/ListPanel/ListPanel.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import PkpHeader from '@/components/Header/Header.vue';
+import PkpFilter from '@/components/Filter/Filter';
 import Search from '@/components/Search/Search.vue';
 import fetch from '@/mixins/fetch';
 import DoiListItem from '@/components/ListPanel/doi/DoiListItem';
+import Dropdown from '@/components/Dropdown/Dropdown';
 
 export default {
 	components: {
+		Dropdown,
 		DoiListItem,
 		ListPanel,
 		Pagination,
+		PkpFilter,
 		PkpHeader,
 		Search
 	},
@@ -107,8 +176,52 @@ export default {
 	},
 	data() {
 		return {
+			activeFilters: {},
+			filters: [
+				{
+					heading: 'Publication Status',
+					filters: [
+						{
+							title: 'Published',
+							param: 'isPublished',
+							value: true
+						},
+						{
+							title: 'Unpublished',
+							param: 'isPublished',
+							value: false
+						}
+					]
+				},
+				{
+					heading: 'CrossRef Deposit Status',
+					filters: [
+						{
+							title: 'Not deposited',
+							param: 'depositStatus',
+							value: 'notDeposited'
+						},
+						{
+							title: 'Active',
+							param: 'depositStatus',
+							value: 'registered'
+						},
+						{
+							title: 'Failed',
+							param: 'depositStatus',
+							value: 'failed'
+						},
+						{
+							title: 'Marked Active',
+							param: 'depositStatus',
+							value: 'markedRegistered'
+						}
+					]
+				}
+			],
 			isExpandAllOn: false,
 			isSelectAllOn: false,
+			isSidebarVisible: false,
 			selected: []
 		};
 	},
@@ -121,11 +234,14 @@ export default {
 		 * @param {Number} itemsMax
 		 */
 		setItems(items, itemsMax) {
+			this.items = items;
+			this.itemsMax = itemsMax;
 			this.$emit('set', this.id, {
 				items,
 				itemsMax
 			});
 		},
+		// Toggles
 		/**
 		 * Toggle DoiListItem status in DoiListPanel
 		 *
@@ -162,6 +278,59 @@ export default {
 				this.selected = this.items.map(i => i.id);
 				this.isSelectAllOn = true;
 			}
+		},
+		/**
+		 * Add a filter
+		 *
+		 * @param {String} param
+		 * @param {mixed} value
+		 */
+		addFilter(param, value) {
+			let newFilters = {...this.activeFilters};
+			if (['isPublished'].includes(param)) {
+				// Handle "toggleable" filters
+				newFilters[param] = value;
+			} else {
+				// Handle multi-select filters
+				if (!newFilters[param]) {
+					newFilters[param] = [];
+				}
+				newFilters[param].push(value);
+			}
+			this.activeFilters = newFilters;
+		},
+		/**
+		 * Is a filter currently active?
+		 *
+		 * @param {string} param The filter param
+		 * @param {mixed} value The filter value
+		 * @return {Boolean}
+		 */
+		isFilterActive: function(param, value) {
+			if (!Object.keys(this.activeFilters).includes(param)) {
+				return false;
+			}
+			if (Array.isArray(this.activeFilters[param])) {
+				return this.activeFilters[param].includes(value);
+			}
+			return this.activeFilters[param] === value;
+		},
+		/**
+		 * Remove a filter
+		 *
+		 * @param {String} param
+		 * @param {mixed} value
+		 */
+		removeFilter(param, value) {
+			let newFilters = {...this.activeFilters};
+			if (['isPublished'].includes(param)) {
+				// Handle "toggleable" filters
+				delete newFilters[param];
+			} else {
+				// Handle multi-select filters
+				newFilters[param] = newFilters[param].filter(v => v !== value);
+			}
+			this.activeFilters = newFilters;
 		}
 	},
 	watch: {
@@ -185,13 +354,18 @@ export default {
 .doiListPanel {
 	.doiListPanel__options {
 		display: flex;
+		margin-top: 0.5rem;
+	}
+
+	.doiListPanel__options--button {
+		margin-left: 0.25rem;
 	}
 
 	// From PreviewListPanelSelect.vue
 	.listPanel__selectAllWrapper {
 		display: flex;
 		align-items: center;
-		margin-top: 1rem;
+		//margin-top: 1rem;
 		margin-left: -0.5rem;
 		margin-right: auto;
 		line-height: 1.5rem;

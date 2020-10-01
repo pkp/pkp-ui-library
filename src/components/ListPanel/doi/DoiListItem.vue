@@ -44,12 +44,6 @@
 						{{ publicationStatusLabel }}
 					</badge>
 					<badge
-						v-if="!isEveryDoiDeposited"
-						class="doiListItem__itemMetadata--badge"
-					>
-						Not deposited
-					</badge>
-					<badge
 						v-if="isPublished && !isEveryDoiDeposited"
 						class="doiListItem__itemMetadata--badge"
 						:is-warnable="true"
@@ -72,6 +66,7 @@
 			v-if="isExpanded"
 			class="listPanel__itemExpanded listPanel__itemExpanded--doi"
 		>
+			<pkp-button :is-primary="true">Deposit DOI</pkp-button>
 			<list>
 				<list-item v-for="item in doiList" :key="item.id">
 					<template slot="value">{{ item.type }}</template>
@@ -87,9 +82,9 @@
 
 						<div class="doiListItem__doiActions">
 							<badge>Not deposited</badge>
-							<pkp-button :isPrimary="true">
-								Deposit DOI
-							</pkp-button>
+							<!--							<pkp-button :isPrimary="true">-->
+							<!--								Deposit DOI-->
+							<!--							</pkp-button>-->
 						</div>
 					</div>
 				</list-item>
