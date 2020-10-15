@@ -6,6 +6,10 @@ export default [
 	{
 		...submission,
 		id: 2,
+		'crossref::batchId': '_12345678',
+		'crossref::failedMsg': null,
+		'crossref::registeredDoi': '10.9876/pub123',
+		'crossref::status': 'registered',
 		currentPublicationId: 22,
 		publications: [
 			{

@@ -17,58 +17,7 @@ export default {
 		DoiListPanel
 	},
 	data() {
-		const submissionItems = [
-			{
-				id: 1,
-				objectType: 'submission',
-				object: submissions[0]
-			},
-			{
-				id: 2,
-				objectType: 'submission',
-				object: submissions[1]
-			},
-			{
-				id: 3,
-				objectType: 'submission',
-				object: submissions[2]
-			},
-			{
-				id: 4,
-				objectType: 'submission',
-				object: submissions[3]
-			},
-			{
-				id: 5,
-				objectType: 'submission',
-				object: submissions[4]
-			},
-			{
-				id: 6,
-				objectType: 'submission',
-				object: submissions[5]
-			},
-			{
-				id: 7,
-				objectType: 'submission',
-				object: submissions[6]
-			},
-			{
-				id: 8,
-				objectType: 'submission',
-				object: submissions[7]
-			},
-			{
-				id: 9,
-				objectType: 'submission',
-				object: submissions[8]
-			},
-			{
-				id: 10,
-				objectType: 'submission',
-				object: submissions[9]
-			}
-		];
+		const submissionItems = [...submissions];
 		// const issueItems = [
 		// 	{
 		// 		id: 1,

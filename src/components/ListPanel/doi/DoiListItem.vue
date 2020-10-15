@@ -17,7 +17,7 @@
 			<div v-if="isSubmission" class="listPanel__itemIdentity">
 				<!-- Submission -->
 				<div class="listPanel__itemTitle doiListItem__itemTitle">
-					{{ item.object.id }} /
+					{{ item.id }} /
 					<b>{{ currentPublication.authorsStringShort }}</b>
 					/
 					<a :href="this.currentPublication.urlPublished" target="_blank">
@@ -29,7 +29,7 @@
 			<div v-else class="listPanel__itemIdentity">
 				<!-- Issue -->
 				<div class="listPanel__itemTitle">
-					{{ item.object.title }}
+					{{ item.title }}
 				</div>
 				<div class="listPanel__itemSubtitle">
 					{{ issueInfo }}
@@ -81,7 +81,7 @@
 						</div>
 
 						<div class="doiListItem__doiActions">
-							<badge>Not deposited</badge>
+							<badge>{{ item.depositStatus }}</badge>
 							<!--							<pkp-button :isPrimary="true">-->
 							<!--								Deposit DOI-->
 							<!--							</pkp-button>-->
@@ -147,8 +147,8 @@ export default {
 		currentPublication() {
 			if (this.isSubmission === false) return null;
 
-			return this.item.object.publications.find(
-				publication => publication.id === this.item.object.currentPublicationId
+			return this.item.publications.find(
+				publication => publication.id === this.item.currentPublicationId
 			);
 		},
 		/**
@@ -167,7 +167,12 @@ export default {
 						id: 'article-' + this.currentPublication.id,
 						type: 'Article',
 						identifier: this.currentPublication['pub-id::doi'],
-						depositStatus: 'Not deposited'
+						depositStatus:
+							this.item['crossref::status'] === null
+								? 'notDeposited'
+								: this.item['crossref::status']
+						// TODO: DOI is stored in publication but crossref deposit status is in submission only
+						// depositStatus: this.currentPublication['crossref::status']
 					});
 				}
 
@@ -185,12 +190,11 @@ export default {
 				}
 			} else {
 				// If not a submission, we have an issue
-				window.console.log(this.item.object);
 				if (this.item.object.hasOwnProperty('pub-id::doi')) {
 					dois.push({
-						id: 'issue-' + this.item.object.issueId,
+						id: 'issue-' + this.item.issueId,
 						type: 'Issue',
-						identifier: this.item.object['pub-id::doi'],
+						identifier: this.item['pub-id::doi'],
 						depositStatus: 'Not deposited'
 					});
 				}
@@ -207,7 +211,8 @@ export default {
 			return true;
 		},
 		isSubmission() {
-			return this.item.objectType === 'submission';
+			// TODO: Sort out how to handle submission vs. issue. Currently set to always be submission
+			return true;
 		},
 		issueInfo() {
 			return (
@@ -227,9 +232,10 @@ export default {
 		 */
 		isPublished() {
 			if (this.isSubmission) {
-				return this.item.object.status === pkp.const.STATUS_PUBLISHED;
+				// TODO: Should be pkp.const.STATUS_PUBLISHED, not working in OJS
+				return this.item.status === 3;
 			} else {
-				return this.item.object.published === 1; // 1/0 bool in `issues` table
+				return this.item.published === 1; // 1/0 bool in `issues` table
 			}
 		},
 		publicationStatusLabel() {
