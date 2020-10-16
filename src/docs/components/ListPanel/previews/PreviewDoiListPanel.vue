@@ -1,6 +1,6 @@
 <template>
 	<doi-list-panel
-		apiUrl=""
+		apiUrl="http://httpbin.org/get"
 		id="previewDoiListPanel--articles"
 		:items="articleItems"
 		:itemsMax="articleItemMax"

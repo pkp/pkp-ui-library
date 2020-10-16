@@ -182,14 +182,16 @@ export default {
 					heading: 'Publication Status',
 					filters: [
 						{
+							// TODO: Should be pkp.const.STATUS_PUBLISHED, not working in OJS
 							title: 'Published',
-							param: 'isPublished',
-							value: true
+							param: 'status',
+							value: '3'
 						},
 						{
+							// TODO: Should also use pkp.const.STATUS_*
 							title: 'Unpublished',
-							param: 'isPublished',
-							value: false
+							param: 'status',
+							value: '1,5'
 						}
 					]
 				},
@@ -198,22 +200,22 @@ export default {
 					filters: [
 						{
 							title: 'Not deposited',
-							param: 'depositStatus',
+							param: 'crossrefStatus',
 							value: 'notDeposited'
 						},
 						{
 							title: 'Active',
-							param: 'depositStatus',
+							param: 'crossrefStatus',
 							value: 'registered'
 						},
 						{
 							title: 'Failed',
-							param: 'depositStatus',
+							param: 'crossrefStatus',
 							value: 'failed'
 						},
 						{
 							title: 'Marked Active',
-							param: 'depositStatus',
+							param: 'crossrefStatus',
 							value: 'markedRegistered'
 						}
 					]
@@ -234,8 +236,8 @@ export default {
 		 * @param {Number} itemsMax
 		 */
 		setItems(items, itemsMax) {
-			this.items = items;
-			this.itemsMax = itemsMax;
+			// this.items = items;
+			// this.itemsMax = itemsMax;
 			this.$emit('set', this.id, {
 				items,
 				itemsMax
@@ -287,7 +289,7 @@ export default {
 		 */
 		addFilter(param, value) {
 			let newFilters = {...this.activeFilters};
-			if (['isPublished'].includes(param)) {
+			if (['status'].includes(param)) {
 				// Handle "toggleable" filters
 				newFilters[param] = value;
 			} else {
@@ -323,7 +325,7 @@ export default {
 		 */
 		removeFilter(param, value) {
 			let newFilters = {...this.activeFilters};
-			if (['isPublished'].includes(param)) {
+			if (['status'].includes(param)) {
 				// Handle "toggleable" filters
 				delete newFilters[param];
 			} else {
