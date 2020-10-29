@@ -108,6 +108,10 @@ export default {
 		ListItem
 	},
 	props: {
+		apiUrl: {
+			type: String,
+			required: true
+		},
 		item: {
 			type: Object,
 			required: true
@@ -164,15 +168,15 @@ export default {
 				// Get publication (article) DOIs
 				if (this.currentPublication.hasOwnProperty('pub-id::doi')) {
 					dois.push({
-						id: 'article-' + this.currentPublication.id,
+						id: `article-${this.item.id}-${this.currentPublication.id}`,
 						type: 'Article',
 						identifier: this.currentPublication['pub-id::doi'],
 						depositStatus:
 							this.item['crossref::status'] === null
 								? 'notDeposited'
-								: this.item['crossref::status']
+								: this.item['crossref::status'],
+						apiPath: `${this.apiUrl}/${this.item.id}/publications/${this.currentPublication.id}/editDoi`
 						// TODO: DOI is stored in publication but crossref deposit status is in submission only
-						// depositStatus: this.currentPublication['crossref::status']
 					});
 				}
 
@@ -181,10 +185,14 @@ export default {
 					let galley = this.currentPublication.galleys[i];
 					if (galley.hasOwnProperty('pub-id::doi')) {
 						dois.push({
-							id: 'galley-' + galley.id,
+							id: `galley-${this.item.id}-${this.currentPublication.id}-${galley.id}`,
 							type: 'Galley',
 							identifier: galley['pub-id::doi'],
-							depositStatus: 'Not deposited'
+							depositStatus:
+								this.item['crossref::status'] === null
+									? 'notDeposited'
+									: this.item['crossref::status'],
+							apiPath: `${this.apiUrl}/${this.item.id}/publications/${this.currentPublication.id}/galleys/${galley.id}/editDoi`
 						});
 					}
 				}
@@ -296,7 +304,8 @@ export default {
 				value: doiItem.identifier,
 				allErrors: {},
 				isDisabled: true,
-				depositStatus: doiItem.depositStatus
+				depositStatus: doiItem.depositStatus,
+				apiPath: doiItem.apiPath
 			});
 		}
 	},

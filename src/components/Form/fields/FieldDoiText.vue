@@ -78,6 +78,18 @@
 				>
 					{{ __('common.save') }}
 				</pkp-button>
+				<span role="status" aria-live="polite" aria-atomic="true">
+					<transition name="pkpFormPage__status">
+						<span v-if="isSaving" class="pkpFormPage__status">
+							<spinner />
+							{{ __('common.saving') }}
+						</span>
+						<span v-else-if="hasRecentSave" class="pkpFormPage__status">
+							<icon icon="check" :inline="true" />
+							{{ __('form.saved') }}
+						</span>
+					</transition>
+				</span>
 			</div>
 			<field-error
 				v-if="errors && errors.length"
@@ -95,6 +107,7 @@ export default {
 	name: 'FieldDoiText',
 	extends: FieldBase,
 	props: {
+		apiPath: String,
 		depositStatus: String,
 		inputType: String,
 		optIntoEdit: Boolean,
@@ -111,7 +124,11 @@ export default {
 		return {
 			inputStyles: {},
 			isDisabled: false,
-			prefixStyles: {}
+			prefixStyles: {},
+			isSaving: false,
+			hasRecentSave: false,
+			recentSaveInterval: null,
+			lastSaveTimestamp: -1
 		};
 	},
 	computed: {
@@ -148,6 +165,15 @@ export default {
 			return this.depositStatus === 'deposited';
 		}
 	},
+	watch: {
+		/**
+		 * When saving, set the focus to the button wrapper element so it doesn't
+		 * get dropped as the dom updates
+		 */
+		isSaving() {
+			this.$refs.buttons.focus();
+		}
+	},
 	methods: {
 		/**
 		 * Set focus to the control input
@@ -155,11 +181,60 @@ export default {
 		setFocus() {
 			this.$refs.input.focus();
 		},
+		/**
+		 * Submit the DOI edits4
+		 */
 		triggerDoiSave() {
-			// TODO: Not clear if should be handled here or in DoiListItem
-			window.console.log(`Saving DOI (${this.value}) for ${this.name}`);
-			this.$emit('saveDoi', this.name, this.value);
+			this.isSaving = true;
+
+			// TODO: Error handling here
+
+			$.ajax({
+				url: this.apiPath,
+				type: 'POST',
+				headers: {
+					'X-Csrf-Token': pkp.currentUser.csrfToken,
+					'X-Http-Method-Override': 'PUT',
+					contentType: 'application/x-www-form-urlencoded'
+				},
+				data: {'pub-id::doi': `${this.value}`},
+				success: this.success,
+				error: this.error,
+				complete: this.complete
+			});
+		},
+		/**
+		 * Callback to fire when the form submission's ajax request has been
+		 * returned successfully
+		 *
+		 * @param {Object} r The response to the AJAX request
+		 */
+		success: function(r) {
+			this.lastSaveTimestamp = Date.now();
+			// TODO: Update value with response value
+			// TODO: Emit set or saveDoi signal
+			// this.$emit('saveDoi', this.name, this.value);
 			this.isDisabled = true;
+		},
+		/**
+		 * Callback to fire when the form submission's ajax request has been
+		 * returned with errors
+		 *
+		 * @param {Object} r The response to the AJAX request
+		 */
+		error: function(r) {
+			// TODO: Handle AJAX error
+			window.console.log('error', r);
+		},
+		/**
+		 * Callback to fire when the form's submission ajax request has been
+		 * returned, and the success or error callbacks have already been fired.
+		 *
+		 * @param {Object} r The response to the AJAX request
+		 */
+		complete() {
+			this.isDisabled = true;
+			this.isSaving = false;
 		}
 	},
 	mounted() {
@@ -215,6 +290,22 @@ export default {
 		if (this.optIntoEdit) {
 			this.isDisabled = true;
 		}
+
+		/**
+		 * Set an interval timer to check if there is a recent save
+		 *
+		 */
+		this.recentSaveInterval = setInterval(() => {
+			const expire = this.lastSaveTimestamp + 5000;
+			if (this.hasRecentSave && expire < Date.now()) {
+				this.hasRecentSave = false;
+			} else if (!this.hasRecentSave && expire > Date.now()) {
+				this.hasRecentSave = true;
+			}
+		}, 250);
+	},
+	destroyed() {
+		clearInterval(this.recentSaveInterval);
 	}
 };
 </script>
@@ -295,6 +386,7 @@ export default {
 
 .pkpFormField--text__optIntoEdit {
 	margin-left: 0.25rem;
+	margin-right: 0.25rem;
 	height: 2.5rem; // Match input height
 }
 
@@ -314,5 +406,32 @@ export default {
 		margin-top: 0.25rem;
 		height: inherit;
 	}
+}
+
+// From FormPage.vue
+.pkpFormPage__status {
+	display: inline-block;
+	margin-right: 0.5rem;
+	font-size: @font-tiny;
+	transition: all 0.3s;
+	text-align: right;
+
+	.fa {
+		color: @yes;
+	}
+
+	.pkpSpinner {
+		margin-right: 0.25rem;
+	}
+}
+
+.pkpFormPage__status-enter {
+	transform: translateY(0.5rem);
+	opacity: 0;
+}
+
+.pkpFormPage__status-leave-to {
+	transform: translateY(-0.5rem);
+	opacity: 0;
 }
 </style>

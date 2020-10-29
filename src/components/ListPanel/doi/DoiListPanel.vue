@@ -104,6 +104,7 @@
 						<doi-list-item
 							:key="item.id"
 							:item="item"
+							:apiUrl="apiUrl"
 							@toggleDoiSelected="toggleDoiSelected"
 							:selected="selected"
 							:isSelectable="isSelectable"
