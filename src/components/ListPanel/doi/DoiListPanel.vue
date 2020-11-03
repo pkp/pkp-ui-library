@@ -96,6 +96,16 @@
 								@remove-filter="removeFilter"
 							/>
 						</div>
+						<div class="listPanel__filterSet">
+							<!--							<pkp-header>-->
+							<!--								<h4>Issues</h4>-->
+							<!--							</pkp-header>-->
+							<field-select
+								v-bind="issueList"
+								:allErrors="{}"
+								@change="issueFilterChanged"
+							/>
+						</div>
 					</div>
 				</template>
 
@@ -135,11 +145,13 @@ import Search from '@/components/Search/Search.vue';
 import fetch from '@/mixins/fetch';
 import DoiListItem from '@/components/ListPanel/doi/DoiListItem';
 import Dropdown from '@/components/Dropdown/Dropdown';
+import FieldSelect from '@/components/Form/fields/FieldSelect';
 
 export default {
 	components: {
 		Dropdown,
 		DoiListItem,
+		FieldSelect,
 		ListPanel,
 		Pagination,
 		PkpFilter,
@@ -162,6 +174,12 @@ export default {
 			type: Number,
 			default() {
 				return 0;
+			}
+		},
+		issueList: {
+			type: Object,
+			default() {
+				return {};
 			}
 		},
 		title: {
@@ -282,6 +300,32 @@ export default {
 				this.isSelectAllOn = true;
 			}
 		},
+		// Filters
+
+		/**
+		 * Handle change to issue field select for filtering
+		 *
+		 * @param {String} name
+		 * @param {String} prop
+		 * @param {mixed} newValue
+		 * @param {String} localeKey
+		 */
+		issueFilterChanged(name, prop, newValue, localeKey) {
+			// Set value in issueList on DoiListPanel
+			if (this.issueList.isMultilingual) {
+				this.issueList.value[localeKey] = newValue;
+			} else {
+				this.issueList.value = newValue;
+			}
+			// Handle filtering
+			if (newValue === '' || newValue === 0) {
+				// Remove issue filter as 0 means no issue and '' is empty placeholder
+				this.removeFilter(name, newValue);
+			} else {
+				// Add issue filter
+				this.addFilter(name, newValue);
+			}
+		},
 		/**
 		 * Add a filter
 		 *
@@ -290,8 +334,8 @@ export default {
 		 */
 		addFilter(param, value) {
 			let newFilters = {...this.activeFilters};
-			if (['status'].includes(param)) {
-				// Handle "toggleable" filters
+			if (['status'].includes(param) || ['issueIds'].includes(param)) {
+				// Handle "toggleable" or single select filters
 				newFilters[param] = value;
 			} else {
 				// Handle multi-select filters
@@ -326,7 +370,7 @@ export default {
 		 */
 		removeFilter(param, value) {
 			let newFilters = {...this.activeFilters};
-			if (['status'].includes(param)) {
+			if (['status'].includes(param) || ['issueIds'].includes(param)) {
 				// Handle "toggleable" filters
 				delete newFilters[param];
 			} else {
