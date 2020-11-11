@@ -20,25 +20,11 @@
 								<!-- TODO: Localize text -->
 								Filters
 							</pkp-button>
-
-							<!--							<pkp-button @click="toggleExpandAll">-->
-							<!--								&lt;!&ndash; TODO: Localize text &ndash;&gt;-->
-							<!--								{{ isExpandAllOn ? 'Collapse all' : 'Expand all' }}-->
-							<!--							</pkp-button>-->
 						</template>
 					</pkp-header>
 
 					<div class="doiListPanel__options">
 						<div v-if="isSelectable" class="listPanel__selectAllWrapper">
-							<!--							<input-->
-							<!--								type="checkbox"-->
-							<!--								:id="id + '-selectAll'"-->
-							<!--								:checked="isSelectAllOn"-->
-							<!--								@click="toggleSelectAll"-->
-							<!--							/>-->
-							<!--							<label class="listPanel__selectAllLabel" :for="id + '-selectAll'">-->
-							<!--								Select All-->
-							<!--							</label>-->
 							<pkp-button @click="toggleSelectAll">
 								<icon
 									:icon="isSelectAllOn ? 'check-square-o' : 'square-o'"
@@ -78,16 +64,28 @@
 						</h3>
 					</pkp-header>
 					<div>
-						<div
-							v-for="(filterSet, index) in filters"
-							:key="index"
-							class="listPanel__filterSet"
-						>
-							<pkp-header v-if="filterSet.heading">
-								<h4>{{ filterSet.heading }}</h4>
+						<!-- Publication Status -->
+						<div class="listPanel__filterSet">
+							<pkp-header>
+								<h4>{{ filters.publicationStatus.heading }}</h4>
 							</pkp-header>
 							<component
-								v-for="filter in filterSet.filters"
+								v-for="filter in filters.publicationStatus.filters"
+								:key="filter.param + filter.value"
+								:is="filter.filterType || 'pkp-filter'"
+								v-bind="filter"
+								:isFilterActive="isFilterActive(filter.param, filter.value)"
+								@add-filter="addFilter"
+								@remove-filter="removeFilter"
+							/>
+						</div>
+						<!-- Crossref Status -->
+						<div v-if="crossrefPluginEnabled" class="listPanel__filterSet">
+							<pkp-header>
+								<h4>{{ filters.crossrefStatus.heading }}</h4>
+							</pkp-header>
+							<component
+								v-for="filter in filters.crossrefStatus.filters"
 								:key="filter.param + filter.value"
 								:is="filter.filterType || 'pkp-filter'"
 								v-bind="filter"
@@ -119,6 +117,7 @@
 							:selected="selected"
 							:isSelectable="isSelectable"
 							:isExpandAllOn="isExpandAllOn"
+							:crossrefPluginEnabled="crossrefPluginEnabled"
 						/>
 					</slot>
 				</template>
@@ -191,13 +190,19 @@ export default {
 			default() {
 				return true;
 			}
+		},
+		crossrefPluginEnabled: {
+			type: Boolean,
+			default() {
+				return false;
+			}
 		}
 	},
 	data() {
 		return {
 			activeFilters: {},
-			filters: [
-				{
+			filters: {
+				publicationStatus: {
 					heading: 'Publication Status',
 					filters: [
 						{
@@ -214,7 +219,7 @@ export default {
 						}
 					]
 				},
-				{
+				crossrefStatus: {
 					heading: 'CrossRef Deposit Status',
 					filters: [
 						{
@@ -239,7 +244,7 @@ export default {
 						}
 					]
 				}
-			],
+			},
 			isExpandAllOn: false,
 			isSelectAllOn: false,
 			isSidebarVisible: false,

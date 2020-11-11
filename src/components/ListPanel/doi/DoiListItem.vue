@@ -44,7 +44,7 @@
 						{{ publicationStatusLabel }}
 					</badge>
 					<badge
-						v-if="isPublished && !isEveryDoiDeposited"
+						v-if="isPublished && !isEveryDoiDeposited && crossrefPluginEnabled"
 						class="doiListItem__itemMetadata--badge"
 						:is-warnable="true"
 					>
@@ -66,7 +66,9 @@
 			v-if="isExpanded"
 			class="listPanel__itemExpanded listPanel__itemExpanded--doi"
 		>
-			<pkp-button :is-primary="true">Deposit DOI</pkp-button>
+			<pkp-button v-if="crossrefPluginEnabled" :is-primary="true">
+				Deposit DOI
+			</pkp-button>
 			<list>
 				<list-item v-for="item in doiList" :key="item.id">
 					<template slot="value">{{ item.type }}</template>
@@ -81,10 +83,9 @@
 						</div>
 
 						<div class="doiListItem__doiActions">
-							<badge>{{ item.depositStatus }}</badge>
-							<!--							<pkp-button :isPrimary="true">-->
-							<!--								Deposit DOI-->
-							<!--							</pkp-button>-->
+							<badge v-if="crossrefPluginEnabled">
+								{{ item.depositStatus }}
+							</badge>
 						</div>
 					</div>
 				</list-item>
@@ -132,6 +133,12 @@ export default {
 			type: Boolean,
 			default() {
 				return true;
+			}
+		},
+		crossrefPluginEnabled: {
+			type: Boolean,
+			default() {
+				return false;
 			}
 		}
 	},

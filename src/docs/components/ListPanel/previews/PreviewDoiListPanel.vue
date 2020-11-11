@@ -6,6 +6,7 @@
 		:itemsMax="articleItemMax"
 		title="Article DOI Management"
 		:isSelectable="true"
+		:crossrefPluginEnabled="true"
 	/>
 </template>
 <script>
