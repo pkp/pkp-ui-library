@@ -44,7 +44,7 @@
 						{{ publicationStatusLabel }}
 					</badge>
 					<badge
-						v-if="isPublished && !isEveryDoiDeposited && crossrefPluginEnabled"
+						v-if="isPublished && !isDeposited && crossrefPluginEnabled"
 						class="doiListItem__itemMetadata--badge"
 						:is-warnable="true"
 					>
@@ -66,9 +66,45 @@
 			v-if="isExpanded"
 			class="listPanel__itemExpanded listPanel__itemExpanded--doi"
 		>
-			<pkp-button v-if="crossrefPluginEnabled" :is-primary="true">
-				Deposit DOI
-			</pkp-button>
+			<div class="doiListItem__doiSummary">
+				<div class="doiListItem__doiDetail">
+					<pkp-button v-if="crossrefPluginEnabled" :is-primary="true">
+						Deposit DOI
+					</pkp-button>
+					<pkp-button
+						v-if="item['crossref::status'] === 'failed'"
+						ref="depositFailureModalButton"
+						@click="$modal.show('depositFailureMessage')"
+					>
+						<!-- TODO: Localized button name -->
+						View error message
+					</pkp-button>
+					<modal
+						v-bind="MODAL_PROPS"
+						name="depositFailureMessage"
+						@closed="setFocusToRef('depositFailureModalButton')"
+					>
+						<modal-content
+							:closeLabel="__('common.close')"
+							modalName="depositFailureMessage"
+							title="Deposit Failure Message"
+						>
+							<p>
+								---- Explanatory message about Crossref XML validation errors
+								----
+							</p>
+							<div class="crossrefDepositError">
+								<pre>{{ item['crossref::failedMsg'] }}</pre>
+							</div>
+						</modal-content>
+					</modal>
+				</div>
+				<div class="doiListItem__doiActions">
+					<badge v-if="crossrefPluginEnabled">
+						{{ depositStatusString }}
+					</badge>
+				</div>
+			</div>
 			<list>
 				<list-item v-for="item in doiList" :key="item.id">
 					<template slot="value">{{ item.type }}</template>
@@ -80,12 +116,6 @@
 								:opt-into-edit-label="__('common.edit')"
 								@change="changeDoiInput"
 							/>
-						</div>
-
-						<div class="doiListItem__doiActions">
-							<badge v-if="crossrefPluginEnabled">
-								{{ item.depositStatus }}
-							</badge>
 						</div>
 					</div>
 				</list-item>
@@ -99,6 +129,7 @@ import Expander from '@/components/Expander/Expander.vue';
 import FieldDoiText from '@/components/Form/fields/FieldDoiText';
 import List from '@/components/List/List.vue';
 import ListItem from '@/components/List/ListItem.vue';
+import modal from '@/mixins/modal';
 
 export default {
 	name: 'DoiListItem',
@@ -108,6 +139,7 @@ export default {
 		List,
 		ListItem
 	},
+	mixins: [modal],
 	props: {
 		apiUrl: {
 			type: String,
@@ -178,6 +210,7 @@ export default {
 						id: `article-${this.item.id}-${this.currentPublication.id}`,
 						type: 'Article',
 						identifier: this.currentPublication['pub-id::doi'],
+						// TODO: Revisit removing deposit status. Only matters for submission as whole.
 						depositStatus:
 							this.item['crossref::status'] === null
 								? 'notDeposited'
@@ -217,13 +250,17 @@ export default {
 
 			return dois;
 		},
-		isEveryDoiDeposited() {
-			for (const doi of this.doiList) {
-				if (doi.depositStatus === 'Not deposited') {
-					return false;
-				}
-			}
-			return true;
+		depositStatusString() {
+			// TODO: Localize and return proper string
+			return this.item['crossref::status'] === null
+				? 'notDeposited'
+				: this.item['crossref::status'];
+		},
+		isDeposited() {
+			return !(
+				this.item['crossref::status'] === 'notDeposited' ||
+				this.item['crossref::status'] === 'failed'
+			);
 		},
 		isSubmission() {
 			// TODO: Sort out how to handle submission vs. issue. Currently set to always be submission
@@ -333,6 +370,10 @@ export default {
 <style lang="less">
 @import '../../../styles/_import';
 
+.crossrefDepositError {
+	background: rgb(234, 237, 238);
+}
+
 .doiListItem__doiSummary {
 	position: relative;
 	display: flex;
@@ -344,6 +385,15 @@ export default {
 	display: flex;
 	flex: 1;
 	min-width: 0;
+
+	> * {
+		white-space: nowrap;
+	}
+
+	// Space between each button or action
+	> * + * {
+		margin-left: 0.25rem;
+	}
 }
 
 .doiListItem__doiDetail--editButton {
@@ -357,6 +407,7 @@ export default {
 	align-items: center;
 	margin-left: auto;
 	padding-left: 0.5rem;
+	margin-right: 0.25rem;
 
 	> * {
 		white-space: nowrap;
