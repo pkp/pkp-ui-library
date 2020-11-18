@@ -118,6 +118,7 @@
 							:isSelectable="isSelectable"
 							:isExpandAllOn="isExpandAllOn"
 							:crossrefPluginEnabled="crossrefPluginEnabled"
+							:isSubmission="isSubmission"
 						/>
 					</slot>
 				</template>
@@ -195,6 +196,12 @@ export default {
 			type: Boolean,
 			default() {
 				return false;
+			}
+		},
+		isSubmission: {
+			type: Boolean,
+			default() {
+				return true;
 			}
 		}
 	},

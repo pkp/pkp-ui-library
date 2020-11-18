@@ -14,8 +14,9 @@
 			</label>
 
 			<!-- Item overview -->
+
+			<!-- Submission -->
 			<div v-if="isSubmission" class="listPanel__itemIdentity">
-				<!-- Submission -->
 				<div class="listPanel__itemTitle doiListItem__itemTitle">
 					{{ item.id }} /
 					<b>{{ currentPublication.authorsStringShort }}</b>
@@ -26,13 +27,13 @@
 				</div>
 			</div>
 
+			<!-- Issue -->
 			<div v-else class="listPanel__itemIdentity">
-				<!-- Issue -->
 				<div class="listPanel__itemTitle">
-					{{ item.title }}
+					{{ localize(item.title) }}
 				</div>
 				<div class="listPanel__itemSubtitle">
-					{{ issueInfo }}
+					{{ item.identification }}
 				</div>
 			</div>
 
@@ -71,6 +72,7 @@
 					<pkp-button v-if="crossrefPluginEnabled" :is-primary="true">
 						Deposit DOI
 					</pkp-button>
+					<!-- TODO: Does not work with issues -->
 					<pkp-button
 						v-if="item['crossref::status'] === 'failed'"
 						ref="depositFailureModalButton"
@@ -172,6 +174,12 @@ export default {
 			default() {
 				return false;
 			}
+		},
+		isSubmission: {
+			type: Boolean,
+			default() {
+				return true;
+			}
 		}
 	},
 	data() {
@@ -238,12 +246,13 @@ export default {
 				}
 			} else {
 				// If not a submission, we have an issue
-				if (this.item.object.hasOwnProperty('pub-id::doi')) {
+				if (this.item.hasOwnProperty('pub-id::doi')) {
 					dois.push({
-						id: 'issue-' + this.item.issueId,
+						id: `issue-${this.item.id}`, //'issue-' + this.item.issueId,
 						type: 'Issue',
 						identifier: this.item['pub-id::doi'],
-						depositStatus: 'Not deposited'
+						depositStatus: 'Not deposited', // TODO: Needs to be addressed for issues
+						apiPath: `${this.apiUrl}/${this.item.id}/editDoi`
 					});
 				}
 			}
@@ -251,30 +260,23 @@ export default {
 			return dois;
 		},
 		depositStatusString() {
-			// TODO: Localize and return proper string
-			return this.item['crossref::status'] === null
+			// TODO: Needs localization
+			let item = this.isSubmission
+				? this.item
+				: this.publicationWithCrossrefStatus;
+
+			return item['crossref::status'] === null
 				? 'notDeposited'
-				: this.item['crossref::status'];
+				: item['crossref::status'];
 		},
 		isDeposited() {
+			let item = this.isSubmission
+				? this.item
+				: this.publicationWithCrossrefStatus;
+
 			return !(
-				this.item['crossref::status'] === 'notDeposited' ||
-				this.item['crossref::status'] === 'failed'
-			);
-		},
-		isSubmission() {
-			// TODO: Sort out how to handle submission vs. issue. Currently set to always be submission
-			return true;
-		},
-		issueInfo() {
-			return (
-				'Vol: ' +
-				this.item.object.volume +
-				', No: ' +
-				this.item.object.number +
-				', (' +
-				this.item.object.year +
-				')'
+				item['crossref::status'] === 'notDeposited' ||
+				item['crossref::status'] === 'failed'
 			);
 		},
 		/**
@@ -287,7 +289,7 @@ export default {
 				// TODO: Should be pkp.const.STATUS_PUBLISHED, not working in OJS
 				return this.item.status === 3;
 			} else {
-				return this.item.published === 1; // 1/0 bool in `issues` table
+				return this.item.isPublished;
 			}
 		},
 		publicationStatusLabel() {
@@ -297,6 +299,26 @@ export default {
 			} else {
 				return 'Not published';
 			}
+		},
+		/**
+		 * Gets crossref status of first submission.
+		 *
+		 * For checking if issue has had DOI deposited along with a previous submission.
+		 * Will check for registered, if failed will look for another registered submission.
+		 *
+		 * @returns {Object} Submission
+		 */
+		publicationWithCrossrefStatus() {
+			if (this.isSubmission) return null;
+
+			for (const submission of this.item.articles) {
+				if (submission['crossref::status'] === 'registered') {
+					return submission;
+				}
+			}
+
+			// TODO: Handle empty array
+			return this.item.articles[0];
 		}
 	},
 	methods: {
