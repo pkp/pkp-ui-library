@@ -311,14 +311,21 @@ export default {
 		publicationWithCrossrefStatus() {
 			if (this.isSubmission) return null;
 
-			for (const submission of this.item.articles) {
-				if (submission['crossref::status'] === 'registered') {
-					return submission;
+			// Check if issue has at least one article associated with it
+			if (this.item.articles && this.item.articles.length) {
+				// We have at least one article
+				for (const submission of this.item.articles) {
+					if (submission['crossref::status'] === 'registered') {
+						return submission;
+					}
 				}
-			}
 
-			// TODO: Handle empty array
-			return this.item.articles[0];
+				return this.item.articles[0];
+			} else {
+				// Otherwise there are no articles associated with the issue
+				// This means it is not deposited but also cannot be deposited so we return the standard 'not deposited' status
+				return {'crossref::status': null};
+			}
 		}
 	},
 	methods: {
