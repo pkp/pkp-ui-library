@@ -80,7 +80,10 @@
 							/>
 						</div>
 						<!-- Crossref Status -->
-						<div v-if="crossrefPluginEnabled" class="listPanel__filterSet">
+						<div
+							v-if="crossrefPluginEnabled && isSubmission"
+							class="listPanel__filterSet"
+						>
 							<pkp-header>
 								<h4>{{ filters.crossrefStatus.heading }}</h4>
 							</pkp-header>
@@ -94,7 +97,7 @@
 								@remove-filter="removeFilter"
 							/>
 						</div>
-						<div class="listPanel__filterSet">
+						<div v-if="isSubmission" class="listPanel__filterSet">
 							<!--							<pkp-header>-->
 							<!--								<h4>Issues</h4>-->
 							<!--							</pkp-header>-->
@@ -208,50 +211,6 @@ export default {
 	data() {
 		return {
 			activeFilters: {},
-			filters: {
-				publicationStatus: {
-					heading: 'Publication Status',
-					filters: [
-						{
-							// TODO: Should be pkp.const.STATUS_PUBLISHED, not working in OJS
-							title: 'Published',
-							param: 'status',
-							value: '3'
-						},
-						{
-							// TODO: Should also use pkp.const.STATUS_*
-							title: 'Unpublished',
-							param: 'status',
-							value: '1,5'
-						}
-					]
-				},
-				crossrefStatus: {
-					heading: 'CrossRef Deposit Status',
-					filters: [
-						{
-							title: 'Not deposited',
-							param: 'crossrefStatus',
-							value: 'notDeposited'
-						},
-						{
-							title: 'Active',
-							param: 'crossrefStatus',
-							value: 'registered'
-						},
-						{
-							title: 'Failed',
-							param: 'crossrefStatus',
-							value: 'failed'
-						},
-						{
-							title: 'Marked Active',
-							param: 'crossrefStatus',
-							value: 'markedRegistered'
-						}
-					]
-				}
-			},
 			isExpandAllOn: false,
 			isSelectAllOn: false,
 			isSidebarVisible: false,
@@ -346,7 +305,11 @@ export default {
 		 */
 		addFilter(param, value) {
 			let newFilters = {...this.activeFilters};
-			if (['status'].includes(param) || ['issueIds'].includes(param)) {
+			if (
+				['status'].includes(param) ||
+				['issueIds'].includes(param) ||
+				['isPublished'].includes(param)
+			) {
 				// Handle "toggleable" or single select filters
 				newFilters[param] = value;
 			} else {
@@ -382,7 +345,11 @@ export default {
 		 */
 		removeFilter(param, value) {
 			let newFilters = {...this.activeFilters};
-			if (['status'].includes(param) || ['issueIds'].includes(param)) {
+			if (
+				['status'].includes(param) ||
+				['issueIds'].includes(param) ||
+				['isPublished'].includes(param)
+			) {
 				// Handle "toggleable" filters
 				delete newFilters[param];
 			} else {
@@ -390,6 +357,74 @@ export default {
 				newFilters[param] = newFilters[param].filter(v => v !== value);
 			}
 			this.activeFilters = newFilters;
+		}
+	},
+	computed: {
+		filters() {
+			if (this.isSubmission) {
+				return {
+					publicationStatus: {
+						heading: 'Publication Status',
+						filters: [
+							{
+								// TODO: Should be pkp.const.STATUS_PUBLISHED, not working in OJS
+								title: 'Published',
+								param: 'status',
+								value: '3'
+							},
+							{
+								// TODO: Should also use pkp.const.STATUS_*
+								title: 'Unpublished',
+								param: 'status',
+								value: '1,5'
+							}
+						]
+					},
+					crossrefStatus: {
+						heading: 'CrossRef Deposit Status',
+						filters: [
+							{
+								title: 'Not deposited',
+								param: 'crossrefStatus',
+								value: 'notDeposited'
+							},
+							{
+								title: 'Active',
+								param: 'crossrefStatus',
+								value: 'registered'
+							},
+							{
+								title: 'Failed',
+								param: 'crossrefStatus',
+								value: 'failed'
+							},
+							{
+								title: 'Marked Active',
+								param: 'crossrefStatus',
+								value: 'markedRegistered'
+							}
+						]
+					}
+				};
+			} else {
+				return {
+					publicationStatus: {
+						heading: 'Publication Status',
+						filters: [
+							{
+								title: 'Published',
+								param: 'isPublished',
+								value: '1'
+							},
+							{
+								title: 'Unpublished',
+								param: 'isPublished',
+								value: '0'
+							}
+						]
+					}
+				};
+			}
 		}
 	},
 	watch: {
