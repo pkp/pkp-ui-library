@@ -64,20 +64,22 @@
 					:count="multilingualFieldsCompleted"
 					:total="locales.length"
 				/>
-				<pkp-button
-					v-if="optIntoEdit && isDisabled && !isDeposited"
-					class="pkpFormField--text__optIntoEdit"
-					@click="isDisabled = false"
-				>
-					{{ optIntoEditLabel }}
-				</pkp-button>
-				<pkp-button
-					v-if="optIntoEdit && !isDisabled && !isDeposited"
-					class="pkpFormField--text__optIntoEdit"
-					@click="triggerDoiSave"
-				>
-					{{ __('common.save') }}
-				</pkp-button>
+				<span ref="buttons">
+					<pkp-button
+						v-if="optIntoEdit && isDisabled && !isDeposited"
+						class="pkpFormField--text__optIntoEdit"
+						@click="isDisabled = false"
+					>
+						{{ optIntoEditLabel }}
+					</pkp-button>
+					<pkp-button
+						v-if="optIntoEdit && !isDisabled && !isDeposited"
+						class="pkpFormField--text__optIntoEdit"
+						@click="triggerDoiSave"
+					>
+						{{ __('common.save') }}
+					</pkp-button>
+				</span>
 				<span role="status" aria-live="polite" aria-atomic="true">
 					<transition name="pkpFormPage__status">
 						<span v-if="isSaving" class="pkpFormPage__status">
