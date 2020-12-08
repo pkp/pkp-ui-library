@@ -116,6 +116,7 @@
 							:key="item.id"
 							:item="item"
 							:apiUrl="apiUrl"
+							:doiPrefix="doiPrefix"
 							@toggleDoiSelected="toggleDoiSelected"
 							:selected="selected"
 							:isSelectable="isSelectable"
@@ -193,6 +194,12 @@ export default {
 			type: Boolean,
 			default() {
 				return true;
+			}
+		},
+		doiPrefix: {
+			type: String,
+			default() {
+				return '';
 			}
 		},
 		crossrefPluginEnabled: {

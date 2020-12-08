@@ -33,7 +33,9 @@
 					{{ localize(item.title) }}
 				</div>
 				<div class="listPanel__itemSubtitle">
-					{{ item.identification }}
+					<a :href="item.publishedUrl" target="_blank">
+						{{ item.identification }}
+					</a>
 				</div>
 			</div>
 
@@ -91,6 +93,7 @@
 							modalName="depositFailureMessage"
 							title="Deposit Failure Message"
 						>
+							<!-- TODO: Add and localize explanatory message -->
 							<p>
 								---- Explanatory message about Crossref XML validation errors
 								----
@@ -114,6 +117,7 @@
 						<div class="doiListItem__doiDetail">
 							<field-doi-text
 								v-bind="getDoiField(item.id)"
+								:doiPrefix="doiPrefix"
 								:opt-into-edit="true"
 								:opt-into-edit-label="__('common.edit')"
 								@change="changeDoiInput"
@@ -146,6 +150,12 @@ export default {
 		apiUrl: {
 			type: String,
 			required: true
+		},
+		doiPrefix: {
+			type: String,
+			default() {
+				return '';
+			}
 		},
 		item: {
 			type: Object,
@@ -275,7 +285,7 @@ export default {
 				: this.publicationWithCrossrefStatus;
 
 			return !(
-				item['crossref::status'] === 'notDeposited' ||
+				item['crossref::status'] === null ||
 				item['crossref::status'] === 'failed'
 			);
 		},
@@ -315,7 +325,10 @@ export default {
 			if (this.item.articles && this.item.articles.length) {
 				// We have at least one article
 				for (const submission of this.item.articles) {
-					if (submission['crossref::status'] === 'registered') {
+					if (
+						submission['crossref::status'] === 'registered' ||
+						submission['crossref::status'] === 'markedRegistered'
+					) {
 						return submission;
 					}
 				}

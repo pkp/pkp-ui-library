@@ -111,6 +111,7 @@ export default {
 	props: {
 		apiPath: String,
 		depositStatus: String,
+		doiPrefix: String,
 		inputType: String,
 		optIntoEdit: Boolean,
 		optIntoEditLabel: String,
@@ -174,6 +175,12 @@ export default {
 		 */
 		isSaving() {
 			this.$refs.buttons.focus();
+		},
+		isDisabled(newValue, oldValue) {
+			if (newValue === false && this.value === null) {
+				this.currentValue = this.doiPrefix;
+				window.console.log('settingValue', this.value);
+			}
 		}
 	},
 	methods: {
@@ -184,7 +191,7 @@ export default {
 			this.$refs.input.focus();
 		},
 		/**
-		 * Submit the DOI edits4
+		 * Submit the DOI edits
 		 */
 		triggerDoiSave() {
 			this.isSaving = true;
