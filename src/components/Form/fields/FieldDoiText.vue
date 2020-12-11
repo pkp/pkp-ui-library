@@ -196,7 +196,7 @@ export default {
 		triggerDoiSave() {
 			this.isSaving = true;
 
-			// TODO: Error handling here
+			// TODO: Error handling needed here
 
 			$.ajax({
 				url: this.apiPath,

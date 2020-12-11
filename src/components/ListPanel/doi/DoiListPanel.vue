@@ -40,6 +40,7 @@
 												Deposit selected
 											</button>
 										</li>
+										<!-- TODO: Remove placeholder button -->
 										<li>
 											<button class="pkpDropdown__action">Button Two</button>
 										</li>
@@ -98,9 +99,7 @@
 							/>
 						</div>
 						<div v-if="isSubmission" class="listPanel__filterSet">
-							<!--							<pkp-header>-->
-							<!--								<h4>Issues</h4>-->
-							<!--							</pkp-header>-->
+							<!-- TODO: Make issue list fit in side panel -->
 							<field-select
 								v-bind="issueList"
 								:allErrors="{}"
@@ -233,8 +232,6 @@ export default {
 		 * @param {Number} itemsMax
 		 */
 		setItems(items, itemsMax) {
-			// this.items = items;
-			// this.itemsMax = itemsMax;
 			this.$emit('set', this.id, {
 				items,
 				itemsMax
@@ -279,7 +276,6 @@ export default {
 			}
 		},
 		// Filters
-
 		/**
 		 * Handle change to issue field select for filtering
 		 *
@@ -305,7 +301,7 @@ export default {
 			}
 		},
 		/**
-		 * Add a filter
+		 * Add an active filter
 		 *
 		 * @param {String} param
 		 * @param {mixed} value
@@ -345,7 +341,7 @@ export default {
 			return this.activeFilters[param] === value;
 		},
 		/**
-		 * Remove a filter
+		 * Remove an active filter
 		 *
 		 * @param {String} param
 		 * @param {mixed} value
@@ -374,7 +370,7 @@ export default {
 						heading: 'Publication Status',
 						filters: [
 							{
-								// TODO: Should be pkp.const.STATUS_PUBLISHED, not working in OJS
+								// TODO: Should be pkp.const.STATUS_PUBLISHED, not available from this page
 								title: 'Published',
 								param: 'status',
 								value: '3'

@@ -258,10 +258,10 @@ export default {
 				// If not a submission, we have an issue
 				if (this.item.hasOwnProperty('pub-id::doi')) {
 					dois.push({
-						id: `issue-${this.item.id}`, //'issue-' + this.item.issueId,
+						id: `issue-${this.item.id}`,
 						type: 'Issue',
 						identifier: this.item['pub-id::doi'],
-						depositStatus: 'Not deposited', // TODO: Needs to be addressed for issues
+						depositStatus: 'Not deposited', // TODO: Needs to be addressed for issues, use `publicationWithCrossrefStatus`
 						apiPath: `${this.apiUrl}/${this.item.id}/editDoi`
 					});
 				}
@@ -269,6 +269,11 @@ export default {
 
 			return dois;
 		},
+		/**
+		 * Gets string for DOI deposit display
+		 *
+		 * @return {String}
+		 */
 		depositStatusString() {
 			// TODO: Needs localization
 			let item = this.isSubmission
@@ -279,6 +284,11 @@ export default {
 				? 'notDeposited'
 				: item['crossref::status'];
 		},
+		/**
+		 * Has the current item been deposited.
+		 *
+		 * @return {Boolean}
+		 */
 		isDeposited() {
 			let item = this.isSubmission
 				? this.item
@@ -290,18 +300,23 @@ export default {
 			);
 		},
 		/**
-		 * Has the current publication been published.
+		 * Has the current item been published.
 		 *
 		 * @return {Boolean}
 		 */
 		isPublished() {
 			if (this.isSubmission) {
-				// TODO: Should be pkp.const.STATUS_PUBLISHED, not working in OJS
+				// TODO: Should be pkp.const.STATUS_PUBLISHED, not included on this page
 				return this.item.status === 3;
 			} else {
 				return this.item.isPublished;
 			}
 		},
+		/**
+		 * Display string for publication status
+		 *
+		 * @return {String}
+		 */
 		publicationStatusLabel() {
 			// TODO: Needs localization
 			if (this.isPublished) {
@@ -314,7 +329,7 @@ export default {
 		 * Gets crossref status of first submission.
 		 *
 		 * For checking if issue has had DOI deposited along with a previous submission.
-		 * Will check for registered, if failed will look for another registered submission.
+		 * Will check for registered/markRegistered, if failed will look for another registered submission.
 		 *
 		 * @returns {Object} Submission
 		 */
