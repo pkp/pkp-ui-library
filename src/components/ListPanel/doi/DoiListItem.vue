@@ -52,7 +52,7 @@
 						:is-warnable="true"
 					>
 						<icon icon="exclamation" :inline="true" />
-						Needs depositing
+						__('plugins.importexport.crossref.status.notDeposited')
 					</badge>
 				</div>
 
@@ -318,11 +318,10 @@ export default {
 		 * @return {String}
 		 */
 		publicationStatusLabel() {
-			// TODO: Needs localization
 			if (this.isPublished) {
-				return 'Published';
+				return this.__('publication.status.published');
 			} else {
-				return 'Not published';
+				return this.__('publication.status.unpublished');
 			}
 		},
 		/**
