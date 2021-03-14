@@ -12,49 +12,62 @@
 								@search-phrase-changed="setSearchPhrase"
 							/>
 
-							<pkp-button
-								:is-active="isSidebarVisible"
-								@click="isSidebarVisible = !isSidebarVisible"
-							>
-								<icon icon="filter" :inline="true" />
-								<!-- TODO: Localize text -->
-								Filters
-							</pkp-button>
-						</template>
-					</pkp-header>
+							<!-- TODO: Localize dropdown -->
+							<dropdown label="Bulk Actions">
+								<div class="pkpDropdown__section">
+									<!-- TODO: Removing mocking and add style? -->
+									<div class="app__userNav__loggedInAs">
+										Take action on 3 selected items
+									</div>
+									<!--								<pkp-button @click="toggleSelectAll">-->
+									<!--									<icon-->
+									<!--											:icon="isSelectAllOn ? 'check-square-o' : 'square-o'"-->
+									<!--											:inline="true"-->
+									<!--									/>-->
+									<!--									Select All-->
+									<!--								</pkp-button>-->
+									<button class="-linkButton" @click="toggleSelectAll">
+										Select All
+									</button>
+								</div>
 
-					<div class="doiListPanel__options">
-						<div v-if="isSelectable" class="listPanel__selectAllWrapper">
-							<pkp-button @click="toggleSelectAll">
-								<icon
-									:icon="isSelectAllOn ? 'check-square-o' : 'square-o'"
-									:inline="true"
-								/>
-								Select All
-							</pkp-button>
-							<div class="doiListPanel__options--button">
-								<dropdown label="Actions">
+								<div class="pkpDropdown__section">
 									<ul>
 										<li>
 											<button class="pkpDropdown__action">
-												Deposit selected
+												Deposit
 											</button>
 										</li>
-										<!-- TODO: Remove placeholder button -->
+
 										<li>
-											<button class="pkpDropdown__action">Button Two</button>
+											<button class="pkpDropdown__action">
+												Assign DOIs
+											</button>
+										</li>
+
+										<li>
+											<button
+												class="pkpDropdown__action"
+												@click="toggleExpandAll"
+											>
+												<!-- TODO: Localize text -->
+												{{ isExpandAllOn ? 'Collapse' : 'Expand' }}
+											</button>
 										</li>
 									</ul>
-								</dropdown>
-							</div>
-						</div>
-						<span class="doiListPanel__options--button">
-							<pkp-button @click="toggleExpandAll">
-								<!-- TODO: Localize text -->
-								{{ isExpandAllOn ? 'Collapse all' : 'Expand all' }}
+								</div>
+							</dropdown>
+
+							<!-- TODO: Localize -->
+							<pkp-button
+								ref="modalDepositButton"
+								:isPrimary="true"
+								@click="openDepositDialog"
+							>
+								Deposit
 							</pkp-button>
-						</span>
-					</div>
+						</template>
+					</pkp-header>
 				</template>
 
 				<template slot="sidebar">
@@ -219,7 +232,7 @@ export default {
 			activeFilters: {},
 			isExpandAllOn: false,
 			isSelectAllOn: false,
-			isSidebarVisible: false,
+			isSidebarVisible: true,
 			selected: []
 		};
 	},
@@ -360,6 +373,10 @@ export default {
 				newFilters[param] = newFilters[param].filter(v => v !== value);
 			}
 			this.activeFilters = newFilters;
+		},
+		openDepositDialog() {
+			// TODO: Add deposit dialog here
+			// See: https://github.com/NateWr/ui-library/commit/d6c0273ab8e9a26722516b7d5599aa288c17f2d5#diff-e820a15c0df3854b4ca212206c6c6a5cc3c4826f49d7c83badd2a5b45855a06eR363-R378
 		}
 	},
 	computed: {

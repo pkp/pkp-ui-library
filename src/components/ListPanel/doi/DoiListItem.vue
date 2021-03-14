@@ -71,9 +71,6 @@
 		>
 			<div class="doiListItem__doiSummary">
 				<div class="doiListItem__doiDetail">
-					<pkp-button v-if="crossrefPluginEnabled" :is-primary="true">
-						Deposit DOI
-					</pkp-button>
 					<!-- TODO: Does not work with issues -->
 					<pkp-button
 						v-if="item['crossref::status'] === 'failed'"
@@ -126,6 +123,12 @@
 					</div>
 				</list-item>
 			</list>
+			<div class="listPanel__itemExpandedActions">
+				<pkp-button v-if="crossrefPluginEnabled">
+					<!-- :is-primary="true" -->
+					Deposit DOI
+				</pkp-button>
+			</div>
 		</div>
 	</div>
 </template>
