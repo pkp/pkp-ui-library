@@ -74,51 +74,27 @@
 					<pkp-header :isOneLine="false">
 						<h3>
 							<icon icon="filter" :inline="true" />
-							Filters
+							{{ __('common.filter') }}
 						</h3>
 					</pkp-header>
-					<div>
-						<!-- Publication Status -->
-						<div class="listPanel__filterSet">
-							<pkp-header>
-								<h4>{{ filters.publicationStatus.heading }}</h4>
-							</pkp-header>
-							<component
-								v-for="filter in filters.publicationStatus.filters"
-								:key="filter.param + filter.value"
-								:is="filter.filterType || 'pkp-filter'"
-								v-bind="filter"
-								:isFilterActive="isFilterActive(filter.param, filter.value)"
-								@add-filter="addFilter"
-								@remove-filter="removeFilter"
-							/>
-						</div>
-						<!-- Crossref Status -->
-						<div
-							v-if="crossrefPluginEnabled && isSubmission"
-							class="listPanel__filterSet"
-						>
-							<pkp-header>
-								<h4>{{ filters.crossrefStatus.heading }}</h4>
-							</pkp-header>
-							<component
-								v-for="filter in filters.crossrefStatus.filters"
-								:key="filter.param + filter.value"
-								:is="filter.filterType || 'pkp-filter'"
-								v-bind="filter"
-								:isFilterActive="isFilterActive(filter.param, filter.value)"
-								@add-filter="addFilter"
-								@remove-filter="removeFilter"
-							/>
-						</div>
-						<div v-if="isSubmission" class="listPanel__filterSet">
-							<!-- TODO: Make issue list fit in side panel -->
-							<field-select
-								v-bind="issueList"
-								:allErrors="{}"
-								@change="issueFilterChanged"
-							/>
-						</div>
+					<div
+						v-for="(filterSet, index) in filters"
+						:key="index"
+						class="listPanel__block"
+					>
+						<pkp-header v-if="filterSet.heading">
+							<h4>{{ filterSet.heading }}</h4>
+						</pkp-header>
+						<component
+							v-for="filter in filterSet.filters"
+							:key="filter.param + filter.value"
+							:is="filter.filterType || 'pkp-filter'"
+							v-bind="filter"
+							:isFilterActive="isFilterActive(filter.param, filter.value)"
+							@add-filter="addFilter"
+							@remove-filter="removeFilter"
+							@update-filter="addFilter"
+						/>
 					</div>
 				</template>
 
@@ -156,7 +132,8 @@
 import ListPanel from '@/components/ListPanel/ListPanel.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import PkpHeader from '@/components/Header/Header.vue';
-import PkpFilter from '@/components/Filter/Filter';
+import PkpFilter from '@/components/Filter/Filter.vue';
+import PkpFilterAutosuggest from '@/components/Filter/FilterAutosuggest.vue';
 import Search from '@/components/Search/Search.vue';
 import fetch from '@/mixins/fetch';
 import DoiListItem from '@/components/ListPanel/doi/DoiListItem';
@@ -171,6 +148,7 @@ export default {
 		ListPanel,
 		Pagination,
 		PkpFilter,
+		PkpFilterAutosuggest,
 		PkpHeader,
 		Search
 	},
@@ -192,7 +170,7 @@ export default {
 				return 0;
 			}
 		},
-		issueList: {
+		issueFilter: {
 			type: Object,
 			default() {
 				return {};
@@ -290,6 +268,7 @@ export default {
 		},
 		// Filters
 		/**
+		 * TODO: Remove
 		 * Handle change to issue field select for filtering
 		 *
 		 * @param {String} name
@@ -299,10 +278,10 @@ export default {
 		 */
 		issueFilterChanged(name, prop, newValue, localeKey) {
 			// Set value in issueList on DoiListPanel
-			if (this.issueList.isMultilingual) {
-				this.issueList.value[localeKey] = newValue;
+			if (this.issueFilter.isMultilingual) {
+				this.issueFilter.value[localeKey] = newValue;
 			} else {
-				this.issueList.value = newValue;
+				this.issueFilter.value = newValue;
 			}
 			// Handle filtering
 			if (newValue === '' || newValue === 0) {
@@ -321,11 +300,7 @@ export default {
 		 */
 		addFilter(param, value) {
 			let newFilters = {...this.activeFilters};
-			if (
-				['status'].includes(param) ||
-				['issueIds'].includes(param) ||
-				['isPublished'].includes(param)
-			) {
+			if (['status'].includes(param) || ['isPublished'].includes(param)) {
 				// Handle "toggleable" or single select filters
 				newFilters[param] = value;
 			} else {
@@ -361,11 +336,7 @@ export default {
 		 */
 		removeFilter(param, value) {
 			let newFilters = {...this.activeFilters};
-			if (
-				['status'].includes(param) ||
-				['issueIds'].includes(param) ||
-				['isPublished'].includes(param)
-			) {
+			if (['status'].includes(param) || ['isPublished'].includes(param)) {
 				// Handle "toggleable" filters
 				delete newFilters[param];
 			} else {
@@ -380,10 +351,10 @@ export default {
 		}
 	},
 	computed: {
-		filters() {
+		computedFilters() {
 			if (this.isSubmission) {
-				return {
-					publicationStatus: {
+				return [
+					{
 						heading: 'Publication Status',
 						filters: [
 							{
@@ -400,7 +371,7 @@ export default {
 							}
 						]
 					},
-					crossrefStatus: {
+					{
 						heading: 'CrossRef Deposit Status',
 						filters: [
 							{
@@ -425,10 +396,10 @@ export default {
 							}
 						]
 					}
-				};
+				];
 			} else {
-				return {
-					publicationStatus: {
+				return [
+					{
 						heading: 'Publication Status',
 						filters: [
 							{
@@ -443,8 +414,11 @@ export default {
 							}
 						]
 					}
-				};
+				];
 			}
+		},
+		filters() {
+			return [...this.computedFilters, this.issueFilter];
 		}
 	},
 	watch: {

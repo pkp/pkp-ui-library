@@ -7,28 +7,56 @@
 		title="Issue DOI Management"
 		:isSelectable="true"
 		:crossrefPluginEnabled="true"
-		:isSubmission="false"
+		:isSubmission="true"
+		:issueFilter="issueFilter"
 	/>
 </template>
 <script>
 import DoiListPanel from '@/components/ListPanel/doi/DoiListPanel.vue';
-// import submissions from '@/docs/data/submissions';
-import issues from '@/docs/data/issues';
+import submissions from '@/docs/data/submissions';
+// import issues from '@/docs/data/issues';
+import fieldBase from '@/docs/components/Form/helpers/field-base';
+import fieldBaseAutosuggest from '@/docs/components/Form/helpers/field-autosuggest';
 
 export default {
 	components: {
 		DoiListPanel
 	},
 	data() {
-		// const submissionItems = [...submissions];
-		const issueItems = [...issues];
+		const submissionItems = [...submissions];
+		// const issueItems = [...issues];
 
 		return {
-			// previewItems: submissionItems,
-			// previewItemsMax: submissionItems.length
-			previewItems: issueItems,
-			previewItemsMax: issueItems.length
+			previewItems: submissionItems,
+			previewItemsMax: submissionItems.length,
+			// previewItems: issueItems,
+			// previewItemsMax: issueItems.length,
+			issueFilter: {
+				filters: [
+					{
+						title: 'Issues',
+						param: 'issueIds',
+						value: [],
+						component: 'field-select-issues',
+						autosuggestProps: {
+							...fieldBase,
+							...fieldBaseAutosuggest,
+							apiUrl: '/issues.json',
+							name: 'issueIds',
+							label: 'Assigned To Issues',
+							selectedLabel: 'Assigned'
+						},
+						filterType: 'pkp-filter-autosuggest'
+					}
+				]
+			}
 		};
+	},
+	created() {
+		/**
+		 * Add required locale keys
+		 */
+		pkp.localeKeys['publication.status.unpublished'] = 'Unpublished';
 	}
 };
 </script>
