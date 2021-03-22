@@ -338,8 +338,20 @@ export default {
 			this.activeFilters = newFilters;
 		},
 		openDepositDialog() {
-			// TODO: Add deposit dialog here
-			// See: https://github.com/NateWr/ui-library/commit/d6c0273ab8e9a26722516b7d5599aa288c17f2d5#diff-e820a15c0df3854b4ca212206c6c6a5cc3c4826f49d7c83badd2a5b45855a06eR363-R378
+			this.openDialog({
+				cancelLabel: 'Cancel',
+				confirmLabel: 'Deposit DOIs',
+				message: `You are about to send DOI metadata records for 23 submission(s) to CrossRef. Are you sure you want to deposit these records?`,
+				modalName: 'deposit',
+				title: 'Deposit DOIs',
+				callback: () => {
+					// Make ajax Request
+					// This code just simulates a server request
+					setTimeout(() => {
+						this.$modal.hide('deposit');
+					}, 2000);
+				}
+			});
 		}
 	},
 	computed: {
