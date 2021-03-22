@@ -15,19 +15,11 @@
 							<!-- TODO: Localize dropdown -->
 							<dropdown label="Bulk Actions">
 								<div class="pkpDropdown__section">
-									<!-- TODO: Removing mocking and add style? -->
 									<div class="app__userNav__loggedInAs">
-										Take action on 3 selected items
+										Take action on {{ selected.length }} selected item(s)
 									</div>
-									<!--								<pkp-button @click="toggleSelectAll">-->
-									<!--									<icon-->
-									<!--											:icon="isSelectAllOn ? 'check-square-o' : 'square-o'"-->
-									<!--											:inline="true"-->
-									<!--									/>-->
-									<!--									Select All-->
-									<!--								</pkp-button>-->
 									<button class="-linkButton" @click="toggleSelectAll">
-										Select All
+										{{ isSelectAllOn ? 'Deselect all' : 'Select all' }}
 									</button>
 								</div>
 
