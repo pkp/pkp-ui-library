@@ -179,7 +179,6 @@ export default {
 		isDisabled(newValue, oldValue) {
 			if (newValue === false && this.value === null) {
 				this.currentValue = this.doiPrefix;
-				window.console.log('settingValue', this.value);
 			}
 		}
 	},
@@ -233,7 +232,6 @@ export default {
 		 */
 		error: function(r) {
 			// TODO: Handle AJAX error
-			window.console.log('error', r);
 		},
 		/**
 		 * Callback to fire when the form's submission ajax request has been
