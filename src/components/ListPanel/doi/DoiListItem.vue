@@ -107,22 +107,29 @@
 					</badge>
 				</div>
 			</div>
-			<list>
-				<list-item v-for="item in doiList" :key="item.id">
-					<template slot="value">{{ item.type }}</template>
-					<div class="doiListItem__doiSummary">
-						<div class="doiListItem__doiDetail">
-							<field-doi-text
-								v-bind="getDoiField(item.id)"
-								:doiPrefix="doiPrefix"
-								:opt-into-edit="true"
-								:opt-into-edit-label="__('common.edit')"
-								@change="changeDoiInput"
-							/>
+			<pkp-table :columns="doiListColumns" :rows="doiList">
+				<template slot-scope="{row, rowIndex}">
+					<table-cell
+						v-for="(column, columnIndex) in doiListColumns"
+						:key="column.name"
+						:column="column"
+						:row="row"
+						:tabindex="!rowIndex && !columnIndex ? 0 : -1"
+					>
+						<div v-if="column.name === 'doi'" class="doiListItem__doiSummary">
+							<div class="doiListItem__doiDetail">
+								<field-doi-text
+									v-bind="getDoiField(row.id)"
+									:doiPrefix="doiPrefix"
+									:opt-into-edit="true"
+									:opt-into-edit-label="__('common.edit')"
+									@change="changeDoiInput"
+								/>
+							</div>
 						</div>
-					</div>
-				</list-item>
-			</list>
+					</table-cell>
+				</template>
+			</pkp-table>
 			<div class="listPanel__itemExpandedActions">
 				<pkp-button v-if="crossrefPluginEnabled">
 					<!-- :is-primary="true" -->
@@ -136,17 +143,17 @@
 <script>
 import Expander from '@/components/Expander/Expander.vue';
 import FieldDoiText from '@/components/Form/fields/FieldDoiText';
-import List from '@/components/List/List.vue';
-import ListItem from '@/components/List/ListItem.vue';
 import modal from '@/mixins/modal';
+import PkpTable from '@/components/Table/Table.vue';
+import TableCell from '@/components/Table/TableCell';
 
 export default {
 	name: 'DoiListItem',
 	components: {
 		Expander,
 		FieldDoiText,
-		List,
-		ListItem
+		PkpTable,
+		TableCell
 	},
 	mixins: [modal],
 	props: {
@@ -198,6 +205,20 @@ export default {
 	data() {
 		return {
 			doiFields: [],
+			doiListColumns: [
+				{
+					name: 'type',
+					label: 'Type',
+					value(row) {
+						return row.type;
+					}
+				},
+				{
+					name: 'doi',
+					label: 'DOI',
+					value: 'value'
+				}
+			],
 			isExpanded: false,
 			isSelected: false
 		};
@@ -495,5 +516,9 @@ export default {
 
 .listPanel__itemExpanded--doi {
 	margin-left: 2.25rem;
+}
+
+.listPanel__itemExpanded .pkpTable {
+	margin-top: 0.5rem;
 }
 </style>
