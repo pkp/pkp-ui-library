@@ -43,7 +43,7 @@ export default {
 							...fieldBaseAutosuggest,
 							apiUrl: '/issues.json',
 							name: 'issueIds',
-							label: 'Assigned To Issues',
+							label: 'Issues',
 							selectedLabel: 'Assigned'
 						},
 						filterType: 'pkp-filter-autosuggest'

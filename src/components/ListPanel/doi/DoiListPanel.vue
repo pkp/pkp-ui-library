@@ -258,32 +258,6 @@ export default {
 				this.isSelectAllOn = true;
 			}
 		},
-		// Filters
-		/**
-		 * TODO: Remove
-		 * Handle change to issue field select for filtering
-		 *
-		 * @param {String} name
-		 * @param {String} prop
-		 * @param {mixed} newValue
-		 * @param {String} localeKey
-		 */
-		issueFilterChanged(name, prop, newValue, localeKey) {
-			// Set value in issueList on DoiListPanel
-			if (this.issueFilter.isMultilingual) {
-				this.issueFilter.value[localeKey] = newValue;
-			} else {
-				this.issueFilter.value = newValue;
-			}
-			// Handle filtering
-			if (newValue === '' || newValue === 0) {
-				// Remove issue filter as 0 means no issue and '' is empty placeholder
-				this.removeFilter(name, newValue);
-			} else {
-				// Add issue filter
-				this.addFilter(name, newValue);
-			}
-		},
 		/**
 		 * Add an active filter
 		 *
