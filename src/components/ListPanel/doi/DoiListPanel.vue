@@ -292,7 +292,7 @@ export default {
 		 */
 		addFilter(param, value) {
 			let newFilters = {...this.activeFilters};
-			if (['status'].includes(param) || ['isPublished'].includes(param)) {
+			if (['status', 'isPublished'].includes(param)) {
 				// Handle "toggleable" or single select filters
 				newFilters[param] = value;
 			} else {
@@ -314,11 +314,11 @@ export default {
 		isFilterActive: function(param, value) {
 			if (!Object.keys(this.activeFilters).includes(param)) {
 				return false;
-			}
-			if (Array.isArray(this.activeFilters[param])) {
+			} else if (Array.isArray(this.activeFilters[param])) {
 				return this.activeFilters[param].includes(value);
+			} else {
+				return this.activeFilters[param] === value;
 			}
-			return this.activeFilters[param] === value;
 		},
 		/**
 		 * Remove an active filter
@@ -328,7 +328,7 @@ export default {
 		 */
 		removeFilter(param, value) {
 			let newFilters = {...this.activeFilters};
-			if (['status'].includes(param) || ['isPublished'].includes(param)) {
+			if (['status', 'isPublished'].includes(param)) {
 				// Handle "toggleable" filters
 				delete newFilters[param];
 			} else {
@@ -362,16 +362,14 @@ export default {
 						heading: 'Publication Status',
 						filters: [
 							{
-								// TODO: Should be pkp.const.STATUS_PUBLISHED, not available from this page
 								title: 'Published',
 								param: 'status',
-								value: '3'
+								value: `${pkp.const.STATUS_PUBLISHED}`
 							},
 							{
-								// TODO: Should also use pkp.const.STATUS_*
 								title: 'Unpublished',
 								param: 'status',
-								value: '1,5'
+								value: `${pkp.const.STATUS_QUEUED}, ${pkp.const.STATUS_SCHEDULED}` // '1,5'
 							}
 						]
 					},
