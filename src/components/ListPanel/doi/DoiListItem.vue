@@ -200,6 +200,12 @@ export default {
 			default() {
 				return true;
 			}
+		},
+		enabledPublishingObjects: {
+			type: Object,
+			default() {
+				return {};
+			}
 		}
 	},
 	data() {
@@ -247,7 +253,10 @@ export default {
 			// DOI List can come from either submission or issue, check submission first
 			if (this.isSubmission === true) {
 				// Get publication (article) DOIs
-				if (this.currentPublication.hasOwnProperty('pub-id::doi')) {
+				if (
+					this.currentPublication.hasOwnProperty('pub-id::doi') &&
+					this.enabledPublishingObjects.publications
+				) {
 					dois.push({
 						id: `article-${this.item.id}-${this.currentPublication.id}`,
 						type: 'Article',
@@ -263,19 +272,21 @@ export default {
 				}
 
 				// Get galley DOIs
-				for (let i = 0; i < this.currentPublication.galleys.length; i++) {
-					let galley = this.currentPublication.galleys[i];
-					if (galley.hasOwnProperty('pub-id::doi')) {
-						dois.push({
-							id: `galley-${this.item.id}-${this.currentPublication.id}-${galley.id}`,
-							type: 'Galley',
-							identifier: galley['pub-id::doi'],
-							depositStatus:
-								this.item['crossref::status'] === null
-									? 'notDeposited'
-									: this.item['crossref::status'],
-							apiPath: `${this.apiUrl}/${this.item.id}/publications/${this.currentPublication.id}/galleys/${galley.id}/editDoi`
-						});
+				if (this.enabledPublishingObjects.representations) {
+					for (let i = 0; i < this.currentPublication.galleys.length; i++) {
+						let galley = this.currentPublication.galleys[i];
+						if (galley.hasOwnProperty('pub-id::doi')) {
+							dois.push({
+								id: `galley-${this.item.id}-${this.currentPublication.id}-${galley.id}`,
+								type: 'Galley',
+								identifier: galley['pub-id::doi'],
+								depositStatus:
+									this.item['crossref::status'] === null
+										? 'notDeposited'
+										: this.item['crossref::status'],
+								apiPath: `${this.apiUrl}/${this.item.id}/publications/${this.currentPublication.id}/galleys/${galley.id}/editDoi`
+							});
+						}
 					}
 				}
 			} else {

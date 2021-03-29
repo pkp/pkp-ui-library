@@ -103,6 +103,7 @@
 							:isExpandAllOn="isExpandAllOn"
 							:crossrefPluginEnabled="crossrefPluginEnabled"
 							:isSubmission="isSubmission"
+							:enabledPublishingObjects="enabledPublishingObjects"
 						/>
 					</slot>
 				</template>
@@ -194,6 +195,12 @@ export default {
 			type: Boolean,
 			default() {
 				return true;
+			}
+		},
+		enabledPublishingObjects: {
+			type: Object,
+			default() {
+				return {};
 			}
 		}
 	},

@@ -4,11 +4,12 @@
 		id="previewDoiListPanel--articles"
 		:items="previewItems"
 		:itemsMax="previewItemsMax"
-		title="Issue DOI Management"
+		title="Article DOIs"
 		:isSelectable="true"
 		:crossrefPluginEnabled="true"
 		:isSubmission="true"
 		:issueFilter="issueFilter"
+		:enabledPublishingObjects="enabledPublishingObjects"
 	/>
 </template>
 <script>
@@ -49,6 +50,11 @@ export default {
 						filterType: 'pkp-filter-autosuggest'
 					}
 				]
+			},
+			enabledPublishingObjects: {
+				issues: true,
+				publications: true,
+				representations: true
 			}
 		};
 	},
