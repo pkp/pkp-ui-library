@@ -51,7 +51,6 @@
 						class="doiListItem__itemMetadata--badge"
 						:is-warnable="true"
 					>
-						<icon icon="exclamation" :inline="true" />
 						{{ __('plugins.importexport.crossref.status.notDeposited') }}
 					</badge>
 				</div>
