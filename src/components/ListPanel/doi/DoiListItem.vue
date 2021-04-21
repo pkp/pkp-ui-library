@@ -19,9 +19,15 @@
 			<div v-if="isSubmission" class="listPanel__itemIdentity">
 				<div class="listPanel__itemTitle doiListItem__itemTitle">
 					{{ item.id }} /
-					<b>{{ currentPublication.authorsStringShort }}</b>
+					<span class="doiListItem__emphasis">
+						{{ currentPublication.authorsStringShort }}
+					</span>
 					/
-					<a :href="this.currentPublication.urlPublished" target="_blank">
+					<a
+						:href="this.currentPublication.urlPublished"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
 						{{ localize(currentPublication.fullTitle) }}
 					</a>
 				</div>
@@ -29,9 +35,6 @@
 
 			<!-- Issue -->
 			<div v-else class="listPanel__itemIdentity">
-				<div class="listPanel__itemTitle">
-					{{ localize(item.title) }}
-				</div>
 				<div class="listPanel__itemSubtitle">
 					<a :href="item.publishedUrl" target="_blank">
 						{{ item.identification }}
@@ -130,7 +133,7 @@
 				</template>
 			</pkp-table>
 			<div class="listPanel__itemExpandedActions">
-				<pkp-button v-if="crossrefPluginEnabled">
+				<pkp-button v-if="crossrefPluginEnabled" @click="triggerDeposit">
 					<!-- :is-primary="true" -->
 					Deposit DOI
 				</pkp-button>
@@ -265,7 +268,7 @@ export default {
 							this.item['crossref::status'] === null
 								? 'notDeposited'
 								: this.item['crossref::status'],
-						apiPath: `${this.apiUrl}/${this.item.id}/publications/${this.currentPublication.id}/editDoi`
+						apiPath: `${this.apiUrl}/${this.item.id}/publications/${this.currentPublication.id}/doi`
 						// TODO: DOI is stored in publication but crossref deposit status is in submission only
 					});
 				}
@@ -277,13 +280,13 @@ export default {
 						if (galley.hasOwnProperty('pub-id::doi')) {
 							dois.push({
 								id: `galley-${this.item.id}-${this.currentPublication.id}-${galley.id}`,
-								type: 'Galley',
+								type: this.currentPublication.galleys[i].label,
 								identifier: galley['pub-id::doi'],
 								depositStatus:
 									this.item['crossref::status'] === null
 										? 'notDeposited'
 										: this.item['crossref::status'],
-								apiPath: `${this.apiUrl}/${this.item.id}/publications/${this.currentPublication.id}/galleys/${galley.id}/editDoi`
+								apiPath: `${this.apiUrl}/${this.item.id}/publications/${this.currentPublication.id}/galleys/${galley.id}/doi`
 							});
 						}
 					}
@@ -296,7 +299,7 @@ export default {
 						type: 'Issue',
 						identifier: this.item['pub-id::doi'],
 						depositStatus: 'Not deposited', // TODO: Needs to be addressed for issues, use `publicationWithCrossrefStatus`
-						apiPath: `${this.apiUrl}/${this.item.id}/editDoi`
+						apiPath: `${this.apiUrl}/${this.item.id}/doi`
 					});
 				}
 			}
@@ -400,6 +403,10 @@ export default {
 		 */
 		changeDoiInput(name, prop, newValue) {
 			this.getDoiField(name).value = newValue;
+		},
+		triggerDeposit() {
+			// TODO: Use constant for 'deposit' string
+			pkp.eventBus.$emit('deposit-triggered', this.item.id, 'deposit');
 		},
 		/**
 		 * Builds DOI URLs
@@ -507,6 +514,10 @@ export default {
 	> * + * {
 		margin-left: 0.25rem;
 	}
+}
+
+.doiListItem__emphasis {
+	font-weight: 700;
 }
 
 .doiListItem__itemTitle {
