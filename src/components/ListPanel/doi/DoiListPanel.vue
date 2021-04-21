@@ -318,11 +318,13 @@ export default {
 			}
 			this.activeFilters = newFilters;
 		},
-		openDepositDialog() {
+		openDepositDialog(itemIds = [], action = 'deposit') {
+			const itemCount =
+				itemIds.length > 0 ? itemIds.length : this.selected.length;
 			this.openDialog({
 				cancelLabel: 'Cancel',
 				confirmLabel: 'Deposit DOIs',
-				message: `You are about to send DOI metadata records for 23 submission(s) to CrossRef. Are you sure you want to deposit these records?`,
+				message: `You are about to send DOI metadata records for ${itemCount} submission(s) to CrossRef. Are you sure you want to deposit these records?`,
 				modalName: 'deposit',
 				title: 'Deposit DOIs',
 				callback: () => {
@@ -415,6 +417,11 @@ export default {
 			this.isSelectAllOn =
 				this.selected.length && this.selected.length === this.items.length;
 		}
+	},
+	mounted() {
+		pkp.eventBus.$on('deposit-triggered', (id, action) => {
+			this.openDepositDialog([id]);
+		});
 	}
 };
 </script>
