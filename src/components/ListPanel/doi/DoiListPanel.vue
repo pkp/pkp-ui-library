@@ -326,7 +326,7 @@ export default {
 		 */
 		removeFilter(param, value) {
 			let newFilters = {...this.activeFilters};
-			if (['status', 'isPublished'].includes(param)) {
+			if (['status', 'isPublished', 'issueIds'].includes(param)) {
 				// Handle "toggleable" filters
 				delete newFilters[param];
 			} else {
