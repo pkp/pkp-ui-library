@@ -21,31 +21,47 @@
 									<button class="-linkButton" @click="toggleSelectAll">
 										{{ isSelectAllOn ? 'Deselect all' : 'Select all' }}
 									</button>
+									<br />
+									<button class="-linkButton" @click="toggleExpandAll">
+										<!-- TODO: Localize text -->
+										{{ isExpandAllOn ? 'Collapse all' : 'Expand all' }}
+									</button>
 								</div>
 
 								<div class="pkpDropdown__section">
 									<ul>
 										<li>
-											<button class="pkpDropdown__action">
-												Deposit
-											</button>
-										</li>
-
-										<li>
-											<button class="pkpDropdown__action">
-												Assign DOIs
+											<button
+												class="pkpDropdown__action"
+												@click="openDepositDialog(selected, 'export')"
+											>
+												Export
 											</button>
 										</li>
 
 										<li>
 											<button
 												class="pkpDropdown__action"
-												@click="toggleExpandAll"
+												@click="openDepositDialog(selected, 'markRegistered')"
 											>
-												<!-- TODO: Localize text -->
-												{{ isExpandAllOn ? 'Collapse' : 'Expand' }}
+												Mark registered
 											</button>
 										</li>
+
+										<li>
+											<button
+												class="pkpDropdown__action"
+												@click="openDepositDialog(selected, 'deposit')"
+											>
+												Deposit
+											</button>
+										</li>
+
+										<!--										<li>-->
+										<!--											<button class="pkpDropdown__action">-->
+										<!--												Assign DOIs-->
+										<!--											</button>-->
+										<!--										</li>-->
 									</ul>
 								</div>
 							</dropdown>
@@ -104,6 +120,7 @@
 							:crossrefPluginEnabled="crossrefPluginEnabled"
 							:isSubmission="isSubmission"
 							:enabledPublishingObjects="enabledPublishingObjects"
+							@deposit-triggered="openDepositDialog"
 						/>
 					</slot>
 				</template>
@@ -319,22 +336,84 @@ export default {
 			this.activeFilters = newFilters;
 		},
 		openDepositDialog(itemIds = [], action = 'deposit') {
-			const itemCount =
-				itemIds.length > 0 ? itemIds.length : this.selected.length;
+			const items = itemIds.length > 0 ? itemIds : this.selected;
+
+			let actionMessage = '';
+			let actionLabel = '';
+			switch (action) {
+				case 'deposit':
+					actionLabel = 'Deposit DOIs';
+					actionMessage = `You are about to send DOI metadata records for ${items.length} submission(s) to CrossRef. Are you sure you want to deposit these records?`;
+					break;
+				case 'markRegistered':
+					actionLabel = 'Mark DOIs registered';
+					actionMessage = `You are about to mark DOI metadata records for ${items.length} submission(s) as registered. Are you sure you want to mark these records as registered?`;
+					break;
+				case 'export':
+					actionLabel = 'Export DOIs';
+					actionMessage = `You are about to export DOI metadata records for ${items.length} submission(s) for CrossRef. Are you sure you want to export these records?`;
+					break;
+			}
 			this.openDialog({
 				cancelLabel: 'Cancel',
-				confirmLabel: 'Deposit DOIs',
-				message: `You are about to send DOI metadata records for ${itemCount} submission(s) to CrossRef. Are you sure you want to deposit these records?`,
+				confirmLabel: actionLabel,
+				message: actionMessage,
 				modalName: 'deposit',
-				title: 'Deposit DOIs',
+				title: actionLabel,
 				callback: () => {
 					// Make ajax Request
 					// This code just simulates a server request
-					setTimeout(() => {
-						this.$modal.hide('deposit');
-					}, 2000);
+					// 	setTimeout(() => {
+					// 		this.$modal.hide('deposit');
+					// 	}, 2000);
+					this.executeExportAction(items, action);
 				}
 			});
+		},
+		executeExportAction(itemIds, action) {
+			const exportUrl = `${this.apiUrl}/crossref?${action}=${action}&submissionIds=${itemIds}`;
+			$.ajax({
+				url: exportUrl,
+				type: 'POST',
+				headers: {
+					'X-Csrf-Token': pkp.currentUser.csrfToken
+					// 'X-Http-Method-Override': 'PUT',
+					// contentType: 'application/x-www-form-urlencoded'
+				},
+				// data: {},
+				success: this.success,
+				error: this.error,
+				complete: this.complete
+			});
+		},
+		/**
+		 * Callback to fire when the form submission's ajax request has been
+		 * returned successfully
+		 *
+		 * @param {Object} r The response to the AJAX request
+		 */
+		success: function(r) {
+			window.console.log('[Success]', r);
+			this.get();
+		},
+		/**
+		 * Callback to fire when the form submission's ajax request has been
+		 * returned with errors
+		 *
+		 * @param {Object} r The response to the AJAX request
+		 */
+		error: function(r) {
+			window.console.log('[Error]', r);
+		},
+		/**
+		 * Callback to fire when the form's submission ajax request has been
+		 * returned, and the success or error callbacks have already been fired.
+		 *
+		 * @param {Object} r The response to the AJAX request
+		 */
+		complete: function(r) {
+			window.console.log('[Complete]', r);
+			this.$modal.hide('deposit');
 		}
 	},
 	computed: {
@@ -419,8 +498,8 @@ export default {
 		}
 	},
 	mounted() {
-		pkp.eventBus.$on('deposit-triggered', (id, action) => {
-			this.openDepositDialog([id]);
+		this.$on('deposit-triggered', (id, action) => {
+			this.openDepositDialog([id], action);
 		});
 	}
 };

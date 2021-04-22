@@ -406,7 +406,8 @@ export default {
 		},
 		triggerDeposit() {
 			// TODO: Use constant for 'deposit' string
-			pkp.eventBus.$emit('deposit-triggered', this.item.id, 'deposit');
+			this.$emit('deposit-triggered', [this.item.id], 'deposit');
+			// pkp.eventBus.$emit('deposit-triggered', this.item.id, 'deposit');
 		},
 		/**
 		 * Builds DOI URLs
