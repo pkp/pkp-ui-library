@@ -31,25 +31,85 @@ export default {
 			previewItemsMax: submissionItems.length,
 			// previewItems: issueItems,
 			// previewItemsMax: issueItems.length,
-			issueFilter: {
-				filters: [
-					{
-						title: 'Issues',
-						param: 'issueIds',
-						value: [],
-						component: 'field-select-issues',
-						autosuggestProps: {
-							...fieldBase,
-							...fieldBaseAutosuggest,
-							apiUrl: '/issues.json',
-							name: 'issueIds',
-							label: 'Issues',
-							selectedLabel: 'Assigned'
+			filters: [
+				// For submissions
+				{
+					filters: [
+						{
+							title: 'Issues',
+							param: 'issueIds',
+							value: [],
+							component: 'field-select-issues',
+							autosuggestProps: {
+								...fieldBase,
+								...fieldBaseAutosuggest,
+								apiUrl: '/issues.json',
+								name: 'issueIds',
+								label: 'Issues',
+								selectedLabel: 'Assigned'
+							},
+							filterType: 'pkp-filter-autosuggest'
+						}
+					]
+				},
+				// For submissions
+				{
+					heading: 'Publication Status',
+					filters: [
+						{
+							title: 'Published',
+							param: 'status',
+							value: `${pkp.const.STATUS_PUBLISHED}`
 						},
-						filterType: 'pkp-filter-autosuggest'
-					}
-				]
-			},
+						{
+							title: 'Unpublished',
+							param: 'status',
+							value: `${pkp.const.STATUS_QUEUED}, ${pkp.const.STATUS_SCHEDULED}` // '1,5'
+						}
+					]
+				},
+				{
+					heading: 'CrossRef Deposit Status',
+					filters: [
+						{
+							title: 'Not deposited',
+							param: 'crossrefStatus',
+							value: 'notDeposited'
+						},
+						{
+							title: 'Active',
+							param: 'crossrefStatus',
+							value: 'registered'
+						},
+						{
+							title: 'Failed',
+							param: 'crossrefStatus',
+							value: 'failed'
+						},
+						{
+							title: 'Marked Active',
+							param: 'crossrefStatus',
+							value: 'markedRegistered'
+						}
+					]
+				},
+				// For issues
+				{
+					heading: 'Publication Status',
+					filters: [
+						{
+							title: 'Published',
+							param: 'isPublished',
+							value: '1'
+						},
+						{
+							title: 'Unpublished',
+							param: 'isPublished',
+							value: '0'
+						}
+					]
+				}
+			],
 			enabledPublishingObjects: {
 				issues: true,
 				publications: true,

@@ -190,8 +190,8 @@ export default {
 				return 0;
 			}
 		},
-		issueFilter: {
-			type: Object,
+		filters: {
+			type: Array,
 			default() {
 				return {};
 			}
@@ -415,75 +415,6 @@ export default {
 			this.$modal.hide('deposit');
 		}
 	},
-	computed: {
-		computedFilters() {
-			if (this.isSubmission) {
-				return [
-					{
-						heading: 'Publication Status',
-						filters: [
-							{
-								title: 'Published',
-								param: 'status',
-								value: `${pkp.const.STATUS_PUBLISHED}`
-							},
-							{
-								title: 'Unpublished',
-								param: 'status',
-								value: `${pkp.const.STATUS_QUEUED}, ${pkp.const.STATUS_SCHEDULED}` // '1,5'
-							}
-						]
-					},
-					{
-						heading: 'CrossRef Deposit Status',
-						filters: [
-							{
-								title: 'Not deposited',
-								param: 'crossrefStatus',
-								value: 'notDeposited'
-							},
-							{
-								title: 'Active',
-								param: 'crossrefStatus',
-								value: 'registered'
-							},
-							{
-								title: 'Failed',
-								param: 'crossrefStatus',
-								value: 'failed'
-							},
-							{
-								title: 'Marked Active',
-								param: 'crossrefStatus',
-								value: 'markedRegistered'
-							}
-						]
-					}
-				];
-			} else {
-				return [
-					{
-						heading: 'Publication Status',
-						filters: [
-							{
-								title: 'Published',
-								param: 'isPublished',
-								value: '1'
-							},
-							{
-								title: 'Unpublished',
-								param: 'isPublished',
-								value: '0'
-							}
-						]
-					}
-				];
-			}
-		},
-		filters() {
-			return [...this.computedFilters, this.issueFilter];
-		}
-	},
 	watch: {
 		/**
 		 * Sets isAllSelected value based on items in `selected` array
@@ -508,15 +439,6 @@ export default {
 @import '../../../styles/_import';
 
 .doiListPanel {
-	.doiListPanel__options {
-		display: flex;
-		margin-top: 0.5rem;
-	}
-
-	.doiListPanel__options--button {
-		margin-left: 0.25rem;
-	}
-
 	// From PreviewListPanelSelect.vue
 	.listPanel__selectAllWrapper {
 		display: flex;
@@ -546,5 +468,14 @@ export default {
 		width: 3rem;
 		padding-left: 1rem;
 	}
+}
+
+.doiListPanel__options {
+	display: flex;
+	margin-top: 0.5rem;
+}
+
+.doiListPanel__options--button {
+	margin-left: 0.25rem;
 }
 </style>
