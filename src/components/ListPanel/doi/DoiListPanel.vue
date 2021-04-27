@@ -24,7 +24,7 @@
 									<br />
 									<button class="-linkButton" @click="toggleExpandAll">
 										<!-- TODO: Localize text -->
-										{{ isExpandAllOn ? 'Collapse all' : 'Expand all' }}
+										{{ isAllExpanded ? 'Collapse all' : 'Expand all' }}
 									</button>
 								</div>
 
@@ -106,6 +106,17 @@
 					</div>
 				</template>
 
+				<!-- TODO: Temporary solution to no items found text appearing on load -->
+				<template slot="itemsEmpty">
+					<template v-if="isLoading">
+						<spinner />
+						{{ __('common.loading') }}
+					</template>
+					<template v-else>
+						{{ __('common.noItemsFound') }}
+					</template>
+				</template>
+
 				<template v-slot:item="{item}">
 					<slot name="item" :item="item">
 						<doi-list-item
@@ -113,13 +124,12 @@
 							:item="item"
 							:apiUrl="apiUrl"
 							:doiPrefix="doiPrefix"
-							@toggleDoiSelected="toggleDoiSelected"
 							:selected="selected"
-							:isSelectable="isSelectable"
-							:isExpandAllOn="isExpandAllOn"
+							:isAllExpanded="isAllExpanded"
 							:crossrefPluginEnabled="crossrefPluginEnabled"
 							:isSubmission="isSubmission"
-							:enabledPublishingObjects="enabledPublishingObjects"
+							:hasDOIs="hasDOIs"
+							@toggleDoiSelected="toggleDoiSelected"
 							@deposit-triggered="openDepositDialog"
 						/>
 					</slot>
@@ -190,12 +200,6 @@ export default {
 			type: String,
 			required: true
 		},
-		isSelectable: {
-			type: Boolean,
-			default() {
-				return true;
-			}
-		},
 		doiPrefix: {
 			type: String,
 			default() {
@@ -214,17 +218,17 @@ export default {
 				return true;
 			}
 		},
-		enabledPublishingObjects: {
-			type: Object,
+		hasDOIs: {
+			type: Array,
 			default() {
-				return {};
+				return [];
 			}
 		}
 	},
 	data() {
 		return {
 			activeFilters: {},
-			isExpandAllOn: false,
+			isAllExpanded: false,
 			isSelectAllOn: false,
 			isSidebarVisible: true,
 			selected: []
@@ -254,12 +258,10 @@ export default {
 		toggleDoiSelected(itemId, isSelected) {
 			if (isSelected) {
 				if (!this.selected.includes(itemId)) {
-					// Add to selected
 					this.selected.push(itemId);
 				}
 			} else {
 				if (this.selected.includes(itemId)) {
-					// Remove if exists
 					this.selected = this.selected.filter(item => item !== itemId);
 				}
 			}
@@ -268,7 +270,7 @@ export default {
 		 * Toggles expand all for DOI tabs
 		 */
 		toggleExpandAll() {
-			this.isExpandAllOn = !this.isExpandAllOn;
+			this.isAllExpanded = !this.isAllExpanded;
 		},
 		/**
 		 * Toggle select all for Ids in selected
@@ -543,6 +545,7 @@ export default {
 	}
 
 	.listPanel__selector {
+		line-height: 100%;
 		width: 3rem;
 		padding-left: 1rem;
 	}

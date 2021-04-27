@@ -2,7 +2,7 @@
 	<div class="listPanel__item--doi">
 		<div class="listPanel__itemSummary">
 			<!-- Item selector -->
-			<label v-if="isSelectable" class="listPanel__selectWrapper">
+			<label class="listPanel__selectWrapper">
 				<div class="listPanel__selector">
 					<input
 						type="checkbox"
@@ -179,16 +179,10 @@ export default {
 				return [];
 			}
 		},
-		isExpandAllOn: {
+		isAllExpanded: {
 			type: Boolean,
 			default() {
 				return false;
-			}
-		},
-		isSelectable: {
-			type: Boolean,
-			default() {
-				return true;
 			}
 		},
 		crossrefPluginEnabled: {
@@ -203,10 +197,10 @@ export default {
 				return true;
 			}
 		},
-		enabledPublishingObjects: {
-			type: Object,
+		hasDOIs: {
+			type: Array,
 			default() {
-				return {};
+				return [];
 			}
 		}
 	},
@@ -256,8 +250,8 @@ export default {
 			if (this.isSubmission === true) {
 				// Get publication (article) DOIs
 				if (
-					this.currentPublication.hasOwnProperty('pub-id::doi') &&
-					this.enabledPublishingObjects.publications
+					this.currentPublication['pub-id::doi'] &&
+					this.hasDOIs.includes('publications')
 				) {
 					dois.push({
 						id: `article-${this.item.id}-${this.currentPublication.id}`,
@@ -274,13 +268,12 @@ export default {
 				}
 
 				// Get galley DOIs
-				if (this.enabledPublishingObjects.representations) {
-					for (let i = 0; i < this.currentPublication.galleys.length; i++) {
-						let galley = this.currentPublication.galleys[i];
-						if (galley.hasOwnProperty('pub-id::doi')) {
+				if (this.hasDOIs.includes('representations')) {
+					this.currentPublication.galleys.forEach(galley => {
+						if (galley['pub-id::doi']) {
 							dois.push({
 								id: `galley-${this.item.id}-${this.currentPublication.id}-${galley.id}`,
-								type: this.currentPublication.galleys[i].label,
+								type: galley.label,
 								identifier: galley['pub-id::doi'],
 								depositStatus:
 									this.item['crossref::status'] === null
@@ -289,11 +282,11 @@ export default {
 								apiPath: `${this.apiUrl}/${this.item.id}/publications/${this.currentPublication.id}/galleys/${galley.id}/doi`
 							});
 						}
-					}
+					});
 				}
 			} else {
 				// If not a submission, we have an issue
-				if (this.item.hasOwnProperty('pub-id::doi')) {
+				if (this.item['pub-id::doi']) {
 					dois.push({
 						id: `issue-${this.item.id}`,
 						type: 'Issue',
@@ -411,6 +404,7 @@ export default {
 		},
 		/**
 		 * Builds DOI URLs
+		 * TODO: Add or remove
 		 *
 		 * @param {String} doi
 		 *
@@ -452,8 +446,8 @@ export default {
 		}
 	},
 	watch: {
-		isExpandAllOn() {
-			this.isExpanded = this.isExpandAllOn;
+		isAllExpanded() {
+			this.isExpanded = this.isAllExpanded;
 		},
 		isSelected(newVal, oldVal) {
 			this.toggleSelected();
@@ -508,7 +502,8 @@ export default {
 	margin-right: 0.25rem;
 
 	> * {
-		white-space: nowrap;
+		// TODO: See if applicable anywhere. Otherwise remove. Use of "*" could cause problems down the line
+		//white-space: nowrap;
 	}
 
 	// Space between each button or action
@@ -540,7 +535,7 @@ export default {
 	margin-left: 2.25rem;
 }
 
-.listPanel__itemExpanded .pkpTable {
+.listPanel__item--doi .listPanel__itemExpanded .pkpTable {
 	margin-top: 0.5rem;
 }
 </style>

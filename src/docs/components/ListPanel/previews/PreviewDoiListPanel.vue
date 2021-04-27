@@ -5,11 +5,10 @@
 		:items="previewItems"
 		:itemsMax="previewItemsMax"
 		title="Article DOIs"
-		:isSelectable="true"
 		:crossrefPluginEnabled="true"
 		:isSubmission="true"
 		:issueFilter="issueFilter"
-		:enabledPublishingObjects="enabledPublishingObjects"
+		hasDOIs="enabledPublishingObjects"
 	/>
 </template>
 <script>
