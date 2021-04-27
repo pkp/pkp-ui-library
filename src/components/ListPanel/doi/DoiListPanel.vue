@@ -345,7 +345,7 @@ export default {
 			switch (action) {
 				case 'deposit':
 					actionLabel = 'Deposit DOIs';
-					actionMessage = `You are about to send DOI metadata records for ${items.length} submission(s) to CrossRef. Are you sure you want to deposit these records?`;
+					actionMessage = `You are about to send DOI metadata records for ${items.length} submission(s) to Crossref. Are you sure you want to deposit these records?`;
 					break;
 				case 'markRegistered':
 					actionLabel = 'Mark DOIs registered';
@@ -353,7 +353,7 @@ export default {
 					break;
 				case 'export':
 					actionLabel = 'Export DOIs';
-					actionMessage = `You are about to export DOI metadata records for ${items.length} submission(s) for CrossRef. Are you sure you want to export these records?`;
+					actionMessage = `You are about to export DOI metadata records for ${items.length} submission(s) for Crossref. Are you sure you want to export these records?`;
 					break;
 			}
 			this.openDialog({
