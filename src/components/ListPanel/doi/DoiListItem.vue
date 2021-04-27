@@ -9,6 +9,7 @@
 						name="submissions[]"
 						:value="item.id"
 						v-model="isSelected"
+						@click="toggleSelected"
 					/>
 				</div>
 			</label>
@@ -427,8 +428,7 @@ export default {
 		 * Toggles item as selected and notifies DoiListPanel
 		 */
 		toggleSelected() {
-			// Notifies DoiListPanel of selection toggle
-			this.$emit('toggleDoiSelected', this.item.id, this.isSelected);
+			this.$emit('selectItem', this.item.id, !this.isSelected);
 		}
 	},
 	mounted: function() {
@@ -448,9 +448,6 @@ export default {
 	watch: {
 		isAllExpanded() {
 			this.isExpanded = this.isAllExpanded;
-		},
-		isSelected(newVal, oldVal) {
-			this.toggleSelected();
 		},
 		selected(newVal, oldVal) {
 			this.isSelected = this.selected.includes(this.item.id);

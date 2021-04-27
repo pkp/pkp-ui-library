@@ -19,7 +19,7 @@
 										Take action on {{ selected.length }} selected item(s)
 									</div>
 									<button class="-linkButton" @click="toggleSelectAll">
-										{{ isSelectAllOn ? 'Deselect all' : 'Select all' }}
+										{{ isAllSelected ? 'Deselect all' : 'Select all' }}
 									</button>
 									<br />
 									<button class="-linkButton" @click="toggleExpandAll">
@@ -129,7 +129,7 @@
 							:crossrefPluginEnabled="crossrefPluginEnabled"
 							:isSubmission="isSubmission"
 							:hasDOIs="hasDOIs"
-							@toggleDoiSelected="toggleDoiSelected"
+							@selectItem="selectItem"
 							@deposit-triggered="openDepositDialog"
 						/>
 					</slot>
@@ -229,7 +229,7 @@ export default {
 		return {
 			activeFilters: {},
 			isAllExpanded: false,
-			isSelectAllOn: false,
+			isAllSelected: false,
 			isSidebarVisible: true,
 			selected: []
 		};
@@ -250,20 +250,17 @@ export default {
 		},
 		// Toggles
 		/**
-		 * Toggle DoiListItem status in DoiListPanel
+		 * Select a DoiListItem in the DoiListPanel
 		 *
 		 * @param {Number} itemId
-		 * @param {Boolean} isSelected Item selection status
+		 * @param {Boolean} select Whether it should be selected or deselected
 		 */
-		toggleDoiSelected(itemId, isSelected) {
-			if (isSelected) {
-				if (!this.selected.includes(itemId)) {
-					this.selected.push(itemId);
-				}
-			} else {
-				if (this.selected.includes(itemId)) {
-					this.selected = this.selected.filter(item => item !== itemId);
-				}
+		selectItem(itemId, select) {
+			const selected = this.selected.includes(itemId);
+			if (select && !selected) {
+				this.selected.push(itemId);
+			} else if (!select && selected) {
+				this.selected = this.selected.filter(item => item !== itemId);
 			}
 		},
 		/**
@@ -276,12 +273,12 @@ export default {
 		 * Toggle select all for Ids in selected
 		 */
 		toggleSelectAll() {
-			if (this.isSelectAllOn) {
+			if (this.isAllSelected) {
 				this.selected = [];
-				this.isSelectAllOn = false;
+				this.isAllSelected = false;
 			} else {
 				this.selected = this.items.map(i => i.id);
-				this.isSelectAllOn = true;
+				this.isAllSelected = true;
 			}
 		},
 		/**
@@ -489,13 +486,13 @@ export default {
 	},
 	watch: {
 		/**
-		 * Sets isSelectAllOn value based on items in `selected` array
+		 * Sets isAllSelected value based on items in `selected` array
 		 *
 		 * @param newVal
 		 * @param oldVal
 		 */
 		selected(newVal, oldVal) {
-			this.isSelectAllOn =
+			this.isAllSelected =
 				this.selected.length && this.selected.length === this.items.length;
 		}
 	},
