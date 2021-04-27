@@ -7,6 +7,7 @@ import ComponentButton from './docs/components/Button/ComponentButton.vue';
 import ComponentCatalogListPanel from './docs/components/ListPanel/ComponentCatalogListPanel.vue';
 import ComponentChart from './docs/components/Chart/ComponentChart.vue';
 import ComponentDateRange from './docs/components/DateRange/ComponentDateRange.vue';
+import ComponentDoiListPanel from './docs/components/ListPanel/ComponentDoiListPanel';
 import ComponentDropdown from './docs/components/Dropdown/ComponentDropdown.vue';
 import ComponentEmailTemplatesListPanel from './docs/components/ListPanel/ComponentEmailTemplatesListPanel.vue';
 import ComponentFilter from './docs/components/Filter/ComponentFilter.vue';
@@ -15,6 +16,7 @@ import ComponentFieldArchivingPn from './docs/components/Form/fields/FieldArchiv
 import ComponentFieldBaseAutosuggest from './docs/components/Form/fields/FieldBaseAutosuggest/ComponentFieldBaseAutosuggest.vue';
 import ComponentFieldBase from './docs/components/Form/fields/FieldBase/ComponentFieldBase.vue';
 import ComponentFieldColor from './docs/components/Form/fields/FieldColor/ComponentFieldColor.vue';
+import ComponentFieldDoiText from '@/docs/components/Form/fields/FieldDoiText/ComponentFieldDoiText';
 import ComponentFieldPubId from './docs/components/Form/fields/FieldPubId/ComponentFieldPubId.vue';
 import ComponentFieldHtml from './docs/components/Form/fields/FieldHtml/ComponentFieldHtml.vue';
 import ComponentFieldMetadataSetting from './docs/components/Form/fields/FieldMetadataSetting/ComponentFieldMetadataSetting.vue';
@@ -127,6 +129,11 @@ export default new Router({
 			component: ComponentFieldColor
 		},
 		{
+			path: '/component/Form/fields/FieldDoiText/:example?',
+			name: 'Form/fields/FieldDoiText',
+			component: ComponentFieldDoiText
+		},
+		{
 			path: '/component/Form/fields/FieldPubId/:example?',
 			name: 'Form/fields/FieldPubId',
 			component: ComponentFieldPubId
@@ -230,6 +237,11 @@ export default new Router({
 			path: '/component/ListPanel/components/CatalogListPanel/:example?',
 			name: 'CatalogListPanel',
 			component: ComponentCatalogListPanel
+		},
+		{
+			path: '/component/ListPanel/components/DoiListPanel/:example?',
+			name: 'DoiListPanel',
+			component: ComponentDoiListPanel
 		},
 		{
 			path: '/component/ListPanel/components/EmailTemplatesListPanel/:example?',
